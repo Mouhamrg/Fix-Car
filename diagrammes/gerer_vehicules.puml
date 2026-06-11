@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+
+title Gérer les véhicules
+
+actor "Client" as Client
+actor "Traceur GPS" as GPS
+
+rectangle "Gérer les véhicules" {
+
+  usecase "Consulter mes véhicules" as UC1
+
+  usecase "Consulter la fiche détaillée\nd'un véhicule" as UC2
+
+  usecase "Voir les informations\ndu traceur GPS" as UC3
+
+  usecase "Voir le message\naucun véhicule assigné" as UC4
+}
+
+Client --> UC1
+Client --> UC2
+
+GPS --> UC3
+
+UC3 .> UC2 : <<extend>>
+UC4 .> UC1 : <<extend>>
+
+@enduml
