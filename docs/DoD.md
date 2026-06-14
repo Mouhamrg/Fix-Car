@@ -1,7 +1,7 @@
 Définition de Terminé — Projet fixmycar
 Équipe FoxTrot | INF6150  
 
- 1. Assurance Qualité Logicielle     
+ ## 1. Assurance Qualité Logicielle     
 - Une fonctionnalité est considérée terminée lorsque toutes les conditions suivantes sont satisfaites :
 - Revue par les pairs : le code a été relu et approuvé par au moins un autre membre de l'équipe via une Merge Request GitLab. Aucun commentaire bloquant ne doit rester ouvert au moment de la fusion.
 - Tests unitaires :  Des tests unitaires ont été rédigés pour couvrir les cas nominaux et les cas limites de la fonctionnalité. Tous les tests passent sans erreur.
@@ -13,7 +13,7 @@ Définition de Terminé — Projet fixmycar
 - Absence de régression : la suite de tests existante passe intégralement après l'intégration de la nouvelle fonctionnalité dans la branche principale.
 - Intégration dans main : la Merge Request est fusionnée et le pipeline d'intégration continue est au vert.
 
-2. Assurance Qualité de la Documentation  
+## 2. Assurance Qualité de la Documentation  
 
 - Un livrable de type documentation est considéré terminé lorsque les conditions suivantes sont toutes satisfaites :
 
