@@ -24,7 +24,7 @@ Si notre équipe cessait d'exister, le projet perdrait une expertise technique a
 
 ## 2. Client de l'équipe (Product Owner)
 
-**Client / PO :** Jacques Berger
+**Client / PO :** Sileye Lamine Guisse
 
 Durant cette session, notre équipe offre ses services de développement au PO du projet FixMyCar, qui valide les priorités, les exigences détaillées et l'acceptation des fonctionnalités livrées.
  
