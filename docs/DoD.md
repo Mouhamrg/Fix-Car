@@ -1,25 +1,24 @@
-Définition de Terminé — Projet fixmycar
-Équipe FoxTrot | INF6150  
+# Définition de Terminé — Projet fixmycar
 
- ## 1. Assurance Qualité Logicielle     
-- Une fonctionnalité est considérée terminée lorsque toutes les conditions suivantes sont satisfaites :
+Équipe FoxTrot | INF6150
+
+## 1. Assurance Qualité Logicielle
+
+Une fonctionnalité est considérée terminée lorsque toutes les conditions suivantes sont satisfaites :
+
 - Revue par les pairs : le code a été relu et approuvé par au moins un autre membre de l'équipe via une Merge Request GitLab. Aucun commentaire bloquant ne doit rester ouvert au moment de la fusion.
-- Tests unitaires :  Des tests unitaires ont été rédigés pour couvrir les cas nominaux et les cas limites de la fonctionnalité. Tous les tests passent sans erreur.
-- Tests de contrôle d'accès: chaque fonctionnalité a été vérifiér pour s'assurer que seuls les rôles autorisés (Client, Mécanicien ou Administrateur) peuvent y accèder et y effectuer les actions permises. 
-
-- Tests des transitions d'état: pour les fonctionnalités impliquant un cycle de vie (demande de réparation, diagnostics, interventions, rendez-vous), chaque transition d'état a été testée et porduit le comportement attendu. 
-- Validation des critères d'acceptation: chaque critère d'acceptation défini dans l'issue GitLab correspondante a été vérifié et confirmé par un membre de l'équipe.
-- Intégrité des données financière: pour les fonctionnalités liées aux factures et aux paiements, les calculs de coûts, taxes et totaux ont été vérifiés manuellement ou par test automatisé.
+- Tests unitaires : des tests unitaires ont été rédigés pour couvrir les cas nominaux et les cas limites de la fonctionnalité. Tous les tests passent sans erreur.
+- Tests de contrôle d'accès : chaque fonctionnalité a été vérifiée pour s'assurer que seuls les rôles autorisés (Client, Mécanicien ou Administrateur) peuvent y accéder et y effectuer les actions permises.
+- Tests des transitions d'état : pour les fonctionnalités impliquant un cycle de vie (demande de réparation, diagnostics, interventions, rendez-vous), chaque transition d'état a été testée et produit le comportement attendu.
+- Validation des critères d'acceptation : chaque critère d'acceptation défini dans l'issue GitLab correspondante a été vérifié et confirmé par un membre de l'équipe.
+- Intégrité des données financières : pour les fonctionnalités liées aux factures et aux paiements, les calculs de coûts, taxes et totaux ont été vérifiés manuellement ou par test automatisé.
 - Absence de régression : la suite de tests existante passe intégralement après l'intégration de la nouvelle fonctionnalité dans la branche principale.
 - Intégration dans main : la Merge Request est fusionnée et le pipeline d'intégration continue est au vert.
 
-## 2. Assurance Qualité de la Documentation  
+## 2. Assurance Qualité de la Documentation
 
-- Un livrable de type documentation est considéré terminé lorsque les conditions suivantes sont toutes satisfaites :
+Un livrable de type documentation est considéré terminé lorsque les conditions suivantes sont toutes satisfaites :
 
 - Revue par les pairs : le document a été relu par au moins un autre membre de l'équipe, qui atteste de sa clarté, de sa cohérence et de l'absence d'erreurs factuelles.
-
 - Alignement avec la portée du projet : le contenu est cohérent avec le document de portée (TP1-Portée-FoxTrot) ainsi qu'avec l'état courant du backlog. Toute divergence est explicitement justifiée.
-
 - Conformité aux exigences du cours : le document respecte le format, la structure et la longueur demandés dans le cadre d'INF6150, et est prêt à être déposé sur Moodle sans retouche supplémentaire.
-
