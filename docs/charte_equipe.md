@@ -4,7 +4,7 @@
 
 * **Nom de l'équipe :** FoxTrot
 * **Nom du projet :** fixmycar
-* **Membres :** Mouhamed Guiro (GUIM73340206)
+* **Membres :** Mouhamed Rassoul Guiro (GUIM73340206)
 * Aboubacar Niang (NIAA86340105)
 * Ibrahima Berete (BERI75290402)
 * Marius Guimatsia Akalong (GUIM27309006)
