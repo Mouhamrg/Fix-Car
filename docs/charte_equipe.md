@@ -31,7 +31,7 @@ L'équipe est responsable du sous-ensemble de fonctionnalités retenu dans le do
 | Coordonnateur | Aboubacar Niang | Planifier les activités, organiser les réunions, suivre les échéances, faciliter la communication, arbitrer les décisions urgentes. |
 | Développeur | Marius Guimatsia Akalong (backend), Aboubacar Niang (frontend) | Concevoir et développer les fonctionnalités, corriger les anomalies, participer aux revues de code, produire la documentation technique. |
 | Responsable Assurance Qualité | Ibrahima Berete | Vérifier le respect de la Définition de Terminé, préparer et réaliser les tests, valider les corrections. |
-| Responsable Gestion de Configuration | Mouhamed Guiro | Administrer le dépôt Git, gérer les branches, garantir l'intégrité des artéfacts, contrôler les versions des livrables. |
+| Responsable Gestion de Configuration | Mouhamed Rassoul Guiro | Administrer le dépôt Git, gérer les branches, garantir l'intégrité des artéfacts, contrôler les versions des livrables. |
 | Point de Contact Technique | Sileye Lamine Guisse | Communiquer avec les autres équipes, identifier les dépendances, résoudre les problèmes d'intégration. |
 | Product Owner (PO) | Sileye Lamine Guisse | Prioriser le carnet de produit, clarifier les exigences, valider les fonctionnalités selon les critères d'acceptation. Représente le client, absent dans le cadre du cours. |
 
