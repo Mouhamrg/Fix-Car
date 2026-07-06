@@ -130,6 +130,7 @@ export default function DemandesPage() {
     <Table.Tr key={demande.id}>
       <Table.Td fw={600}>{demande.titre}</Table.Td>
       <Table.Td>{demande.vehicule}</Table.Td>
+      <Table.Td>{demande.client_nom}</Table.Td>
       <Table.Td>
         <Badge
           variant={['terminee', 'refusee'].includes(demande.statut) ? 'filled' : 'outline'}
@@ -178,6 +179,7 @@ export default function DemandesPage() {
             <Table.Tr>
               <Table.Th>Titre</Table.Th>
               <Table.Th>Véhicule</Table.Th>
+              <Table.Th>Client</Table.Th>
               <Table.Th>Statut</Table.Th>
               <Table.Th>Actions</Table.Th>
             </Table.Tr>
