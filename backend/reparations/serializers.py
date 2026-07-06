@@ -15,4 +15,4 @@ class DemandeReparationSerializer(serializers.ModelSerializer):
             'date_creation',
             'date_modification',
     ]
-    read_only_fields = ['client', 'date_creation', 'date_modification']
+    read_only_fields = ['statut', 'client', 'date_creation', 'date_modification']

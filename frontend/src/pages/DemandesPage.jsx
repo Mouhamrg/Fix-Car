@@ -7,7 +7,6 @@ import {
   Group,
   Loader,
   Modal,
-  Select,
   Table,
   Text,
   Textarea,
@@ -27,7 +26,6 @@ const formVide = {
   titre: '',
   vehicule: '',
   description: '',
-  statut: 'en_attente',
 }
 
 const statuts = {
@@ -98,7 +96,6 @@ export default function DemandesPage() {
       titre: demande.titre,
       vehicule: demande.vehicule,
       description: demande.description,
-      statut: demande.statut,
     })
     setErreur(null)
     setModalOuvert(true)
@@ -222,14 +219,6 @@ export default function DemandesPage() {
             required
             autosize
             minRows={3}
-            mt="sm"
-          />
-          <Select
-            label="Statut"
-            value={form.statut}
-            onChange={(valeur) => champ('statut', valeur)}
-            data={Object.entries(statuts).map(([value, label]) => ({ value, label }))}
-            allowDeselect={false}
             mt="sm"
           />
           <Group justify="flex-end" mt="lg">
