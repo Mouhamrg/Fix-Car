@@ -132,7 +132,7 @@ export default function DemandesPage() {
       <Table.Td>{demande.vehicule}</Table.Td>
       <Table.Td>
         <Badge
-          variant={demande.statut === 'terminee' ? 'filled' : 'outline'}
+          variant={['terminee', 'refusee'].includes(demande.statut) ? 'filled' : 'outline'}
           color="mono.9"
         >
           {statuts[demande.statut]}
