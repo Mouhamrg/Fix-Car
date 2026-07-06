@@ -1,0 +1,180 @@
+@startuml
+title FixMyCar — Modèle conceptuel de données (MCD)
+
+' Référence détaillée (dictionnaire de données, règles de gestion) : docs/mcd.md
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "Utilisateur" as utilisateur {
+  * id : entier <<PK>>
+  --
+  courriel : chaine <<unique>>
+  nom : chaine
+  prenom : chaine
+  telephone : chaine
+  role : enum {client, mecanicien,\ngestionnaire, administrateur}
+  actif : booleen
+}
+
+entity "Vehicule" as vehicule {
+  * id : entier <<PK>>
+  --
+  * proprietaire_id : entier <<FK Utilisateur>>
+  marque : chaine
+  modele : chaine
+  annee : entier
+  immatriculation : chaine <<unique>>
+  niv : chaine <<unique>>
+  kilometrage : entier
+}
+
+entity "RendezVous" as rendez_vous {
+  * id : entier <<PK>>
+  --
+  * client_id : entier <<FK Utilisateur>>
+  vehicule_id : entier <<FK Vehicule>>
+  date_heure : datetime
+  motif : chaine
+  statut : enum {demande, confirme,\nannule, complete}
+}
+
+entity "DemandeReparation" as demande {
+  * id : entier <<PK>>
+  --
+  * vehicule_id : entier <<FK Vehicule>>
+  rendez_vous_id : entier <<FK RendezVous>>
+  description : texte
+  date_soumission : date
+  statut : enum {soumise, diagnostiquee,\nen_reparation, terminee,\nfacturee, annulee}
+}
+
+entity "Diagnostic" as diagnostic {
+  * id : entier <<PK>>
+  --
+  * demande_id : entier <<FK DemandeReparation>>
+  * mecanicien_id : entier <<FK Utilisateur>>
+  resume : texte
+  travaux_requis : texte
+  cout_estime : decimal
+  date_diagnostic : date
+}
+
+entity "TypeReparation" as type_reparation {
+  * id : entier <<PK>>
+  --
+  nom : chaine <<unique>>
+  description : texte
+  prix_base : decimal
+  duree_estimee_heures : decimal
+  actif : booleen
+}
+
+entity "Affectation" as affectation {
+  * id : entier <<PK>>
+  --
+  * demande_id : entier <<FK DemandeReparation>>
+  * mecanicien_id : entier <<FK Utilisateur>>
+  * gestionnaire_id : entier <<FK Utilisateur>>
+  date_affectation : date
+  statut : enum {active, annulee}
+}
+
+entity "Intervention" as intervention {
+  * id : entier <<PK>>
+  --
+  * demande_id : entier <<FK DemandeReparation>>
+  * mecanicien_id : entier <<FK Utilisateur>>
+  titre : chaine
+  description : texte
+  date_intervention : date
+  duree_heures : decimal
+  statut : enum {en_cours, terminee}
+}
+
+entity "Piece" as piece {
+  * id : entier <<PK>>
+  --
+  reference : chaine <<unique>>
+  nom : chaine
+  description : texte
+  prix_unitaire : decimal
+  quantite_stock : entier
+  seuil_alerte : entier
+}
+
+entity "LignePiece" as ligne_piece {
+  * id : entier <<PK>>
+  --
+  * intervention_id : entier <<FK Intervention>>
+  * piece_id : entier <<FK Piece>>
+  quantite : entier
+  prix_unitaire_facture : decimal
+}
+
+entity "Facture" as facture {
+  * id : entier <<PK>>
+  --
+  * demande_id : entier <<FK DemandeReparation>>
+  numero : chaine <<unique>>
+  date_emission : date
+  montant_main_oeuvre : decimal
+  montant_pieces : decimal
+  tps : decimal
+  tvq : decimal
+  montant_total : decimal
+  statut : enum {emise, payee, annulee}
+}
+
+entity "Paiement" as paiement {
+  * id : entier <<PK>>
+  --
+  * facture_id : entier <<FK Facture>>
+  date_paiement : date
+  montant : decimal
+  mode : enum {carte, comptant, virement}
+  reference : chaine
+}
+
+entity "Notification" as notification {
+  * id : entier <<PK>>
+  --
+  * destinataire_id : entier <<FK Utilisateur>>
+  type : enum {rappel_rdv,\navancement, facture}
+  message : texte
+  date_envoi : datetime
+  lue : booleen
+}
+
+entity "Evaluation" as evaluation {
+  * id : entier <<PK>>
+  --
+  * demande_id : entier <<FK DemandeReparation>>
+  * client_id : entier <<FK Utilisateur>>
+  note : entier (1 a 5)
+  commentaire : texte
+  date_evaluation : date
+}
+
+utilisateur ||--o{ vehicule : possède (client)
+utilisateur ||--o{ rendez_vous : prend (client)
+vehicule |o--o{ rendez_vous : concerne
+vehicule ||--o{ demande : porte sur
+rendez_vous |o--o| demande : donne lieu à
+demande ||--o| diagnostic : reçoit
+utilisateur ||--o{ diagnostic : rédige (mécanicien)
+diagnostic }o--o{ type_reparation : préconise
+demande ||--o{ affectation : est assignée via
+utilisateur ||--o{ affectation : reçoit (mécanicien)
+utilisateur ||--o{ affectation : décide (gestionnaire)
+demande ||--o{ intervention : est traitée par
+utilisateur ||--o{ intervention : effectue (mécanicien)
+intervention ||--o{ ligne_piece : consomme
+piece ||--o{ ligne_piece : est utilisée dans
+demande ||--o| facture : est facturée par
+facture ||--o{ paiement : est réglée par
+utilisateur ||--o{ notification : reçoit
+demande ||--o| evaluation : est évaluée par
+utilisateur ||--o{ evaluation : rédige (client)
+
+@enduml
