@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage.jsx'
+import DemandesPage from './pages/DemandesPage.jsx'
 import { isAuthenticated } from './api/client.js'
 
 function ProtectedRoute({ children }) {
@@ -19,6 +20,14 @@ function App() {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/demandes"
+        element={
+          <ProtectedRoute>
+            <DemandesPage />
           </ProtectedRoute>
         }
       />
