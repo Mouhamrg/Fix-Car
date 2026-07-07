@@ -8,8 +8,8 @@
 |---|---|---|---|---|
 | #1 | Gérer les comptes utilisateurs | 8 | 13 h | **AN** |
 | #2 | Gérer les véhicules | 5 | 12 h | **GAM** |
-| #63 | Gérer les rendez-vous | 13 | 14 h | **BI** |
-| #64 | Créer une demande de réparation | 8 | 13 h | **MG** |
+| #3 | Gérer les rendez-vous | 13 | 14 h | **BI** |
+| #4 | Créer une demande de réparation | 8 | 13 h | **MG** |
 | **Total** | | **34** | **52 h** | |
 
 **Tâches de gestion du sprint (livrables TP3a)** — en plus des responsabilités fixes de la section 1 du [product backlog](product-backlog.md) :

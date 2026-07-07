@@ -6,12 +6,12 @@
 
 | Issue | Story | USP | Effort | Responsable |
 |---|---|---|---|---|
-| #65 | Consulter l'état des réparations | 8 | 13 h | **BI** |
-| #66 | Gérer les diagnostics | 13 | 14 h | **GAM** |
-| #67 | Gérer les interventions mécaniques | 13 | 14 h | **SLG** |
-| #68 | Gérer les utilisateurs et rôles | 8 | 13 h | **AN** |
-| #69 | Gérer les types de réparations | 8 | 11 h | **MG** |
-| #70 | Affecter les réparations aux mécaniciens | 8 | 12 h | **GAM** |
+| #5 | Consulter l'état des réparations | 8 | 13 h | **BI** |
+| #6 | Gérer les diagnostics | 13 | 14 h | **GAM** |
+| #7 | Gérer les interventions mécaniques | 13 | 14 h | **SLG** |
+| #8 | Gérer les utilisateurs et rôles | 8 | 13 h | **AN** |
+| #9 | Gérer les types de réparations | 8 | 11 h | **MG** |
+| #10 | Affecter les réparations aux mécaniciens | 8 | 12 h | **GAM** |
 | **Total** | | **58** | **77 h** | |
 
 **Tâches de gestion du sprint (livrables TP3b)** — en plus des responsabilités fixes de la section 1 du [product backlog](product-backlog.md) :
