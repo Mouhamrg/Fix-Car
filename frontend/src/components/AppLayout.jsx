@@ -5,6 +5,7 @@ import { logout } from '../api/client.js'
 const links = [
   { to: '/', label: 'Accueil' },
   { to: '/demandes', label: 'Demandes de reparation' },
+  { to: '/interventions', label: 'Interventions' },
 ]
 
 export default function AppLayout({ children }) {

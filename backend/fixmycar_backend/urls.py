@@ -4,7 +4,7 @@ URL configuration for fixmycar_backend project.
 https://docs.djangoproject.com/en/6.0/topics/http/urls/
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/me/', me, name='me'),
     path('api/', include('reparations.urls')),
+    path('api/', include('interventions.urls')),
 ]
