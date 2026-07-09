@@ -8,6 +8,7 @@ const links = [
   { to: '/demandes', label: 'Demandes de reparation' },
   { to: '/interventions', label: 'Interventions' },
   { to: '/types-reparations', label: 'Types de reparation' },
+  { to: '/profil', label: 'Comptes utilisateurs' },
 ]
 
 export default function AppLayout({ children }) {
