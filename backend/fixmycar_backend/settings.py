@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rendezvous',
     'reparations',
     'interventions',
+    'comptes',
 ]
 
 MIDDLEWARE = [
@@ -152,3 +153,6 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
+
+# Modèle utilisateur personnalisé
+AUTH_USER_MODEL = 'comptes.Utilisateur'
