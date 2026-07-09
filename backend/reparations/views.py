@@ -1,7 +1,7 @@
 from rest_framework import permissions, viewsets
 
-from .models import DemandeReparation
-from .serializers import DemandeReparationSerializer
+from .models import DemandeReparation, TypeReparation
+from .serializers import DemandeReparationSerializer, TypeReparationSerializer
 
 
 class EstClientAuteurOuLectureSeule(permissions.BasePermission):
@@ -24,3 +24,9 @@ class DemandeReparationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
+
+
+class TypeReparationViewSet(viewsets.ModelViewSet):
+    queryset = TypeReparation.objects.all()
+    serializer_class = TypeReparationSerializer
+    permission_classes = [permissions.IsAuthenticated]
