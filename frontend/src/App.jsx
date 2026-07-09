@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import { isAuthenticated } from './api/client.js'
+import RendezVousPage from './pages/RendezVousPage.jsx'
+
 
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
@@ -22,6 +24,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+        <Route
+            path="/rendez-vous"
+            element={
+                <ProtectedRoute>
+                    <RendezVousPage />
+                </ProtectedRoute>
+            }
+        />
     </Routes>
   )
 }
