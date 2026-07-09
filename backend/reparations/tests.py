@@ -1,9 +1,11 @@
-"""Tests des demandes de reparation (#64)."""
+"""Tests des demandes de reparation (#64) et des types de reparation (#69)."""
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import DemandeReparation
+from .models import DemandeReparation, TypeReparation
 
 User = get_user_model()
 
@@ -149,3 +151,111 @@ class DemandeReparationApiTests(APITestCase):
         reponse = self.client.delete(self.url_detail)
         self.assertEqual(reponse.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(DemandeReparation.objects.filter(id=self.demande.id).exists())
+
+
+def creer_type_reparation(**surcharges):
+    """Fabrique un type de reparation avec des valeurs par defaut raisonnables."""
+    donnees = {
+        'nom': 'Vidange',
+        'description': "Vidange d'huile et remplacement du filtre.",
+        'duree_estimee_heures': Decimal('0.75'),
+        'prix_standard': Decimal('49.99'),
+    }
+    donnees.update(surcharges)
+    return TypeReparation.objects.create(**donnees)
+
+
+class TypeReparationModelTests(APITestCase):
+    def test_str_retourne_le_nom(self):
+        type_reparation = creer_type_reparation()
+        self.assertEqual(str(type_reparation), 'Vidange')
+
+    def test_tri_alphabetique_par_nom(self):
+        vidange = creer_type_reparation(nom='Vidange')
+        freins = creer_type_reparation(nom='Changement de freins')
+        self.assertEqual(list(TypeReparation.objects.all()), [freins, vidange])
+
+
+class TypeReparationApiTests(APITestCase):
+    def setUp(self):
+        self.utilisateur = User.objects.create_user(username='testuser', password='x')
+        self.autre_utilisateur = User.objects.create_user(username='julie', password='x')
+        self.type_reparation = creer_type_reparation()
+        self.url_liste = '/api/types-reparations/'
+        self.url_detail = f'/api/types-reparations/{self.type_reparation.id}/'
+
+    def payload(self, **surcharges):
+        donnees = {
+            'nom': 'Changement de freins',
+            'description': 'Remplacement des plaquettes avant.',
+            'duree_estimee_heures': '1.50',
+            'prix_standard': '120.00',
+        }
+        donnees.update(surcharges)
+        return donnees
+
+    # --- Authentification ---
+
+    def test_acces_refuse_sans_authentification(self):
+        for methode, url in [
+            (self.client.get, self.url_liste),
+            (self.client.post, self.url_liste),
+            (self.client.put, self.url_detail),
+            (self.client.delete, self.url_detail),
+        ]:
+            reponse = methode(url)
+            self.assertEqual(reponse.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    # --- Lecture ---
+
+    def test_tout_utilisateur_authentifie_voit_le_catalogue(self):
+        self.client.force_authenticate(self.autre_utilisateur)
+        reponse = self.client.get(self.url_liste)
+        self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(reponse.data), 1)
+        self.assertEqual(reponse.data[0]['nom'], 'Vidange')
+
+    # --- Création ---
+
+    def test_tout_utilisateur_authentifie_peut_creer_un_type(self):
+        self.client.force_authenticate(self.autre_utilisateur)
+        reponse = self.client.post(self.url_liste, self.payload())
+        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(reponse.data['nom'], 'Changement de freins')
+
+    def test_creation_refuse_un_champ_obligatoire_manquant(self):
+        self.client.force_authenticate(self.utilisateur)
+        donnees = self.payload()
+        del donnees['nom']
+        reponse = self.client.post(self.url_liste, donnees)
+        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('nom', reponse.data)
+
+    def test_description_est_optionnelle(self):
+        self.client.force_authenticate(self.utilisateur)
+        donnees = self.payload()
+        del donnees['description']
+        reponse = self.client.post(self.url_liste, donnees)
+        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(reponse.data['description'], '')
+
+    # --- Modification ---
+
+    def test_tout_utilisateur_authentifie_peut_modifier(self):
+        self.client.force_authenticate(self.autre_utilisateur)
+        reponse = self.client.put(
+            self.url_detail, self.payload(nom='Vidange premium')
+        )
+        self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+        self.type_reparation.refresh_from_db()
+        self.assertEqual(self.type_reparation.nom, 'Vidange premium')
+
+    # --- Suppression ---
+
+    def test_tout_utilisateur_authentifie_peut_supprimer(self):
+        self.client.force_authenticate(self.autre_utilisateur)
+        reponse = self.client.delete(self.url_detail)
+        self.assertEqual(reponse.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            TypeReparation.objects.filter(id=self.type_reparation.id).exists()
+        )

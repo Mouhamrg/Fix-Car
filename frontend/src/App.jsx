@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import DemandesPage from './pages/DemandesPage.jsx'
 import InterventionsPage from './pages/InterventionsPage.jsx'
+import TypesReparationsPage from './pages/TypesReparationsPage.jsx'
 import { isAuthenticated } from './api/client.js'
 
 function ProtectedRoute({ children }) {
@@ -37,6 +38,14 @@ function App() {
         element={
           <ProtectedRoute>
             <InterventionsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/types-reparations"
+        element={
+          <ProtectedRoute>
+            <TypesReparationsPage />
           </ProtectedRoute>
         }
       />

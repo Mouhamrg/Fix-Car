@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DemandeReparation
+from .models import DemandeReparation, TypeReparation
 
 
 class DemandeReparationSerializer(serializers.ModelSerializer):
@@ -23,3 +23,18 @@ class DemandeReparationSerializer(serializers.ModelSerializer):
 
     def get_client_nom(self, obj):
         return obj.client.get_full_name() or obj.client.username
+
+
+class TypeReparationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TypeReparation
+        fields = [
+            'id',
+            'nom',
+            'description',
+            'duree_estimee_heures',
+            'prix_standard',
+            'date_creation',
+            'date_modification',
+        ]
+        read_only_fields = ['date_creation', 'date_modification']

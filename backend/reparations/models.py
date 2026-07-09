@@ -38,3 +38,25 @@ class DemandeReparation(models.Model):
     def __str__(self):
         return f'{self.titre} — {self.vehicule}'
 
+
+class TypeReparation(models.Model):
+    """Type de reparation du catalogue standard du garage (#69).
+
+    Donnee de catalogue partagee, sans notion de proprietaire :
+    en attendant les roles (#68), l'ecriture reste ouverte a tout
+    utilisateur authentifie.
+    """
+
+    nom = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    duree_estimee_heures = models.DecimalField(max_digits=4, decimal_places=2)
+    prix_standard = models.DecimalField(max_digits=8, decimal_places=2)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['nom']
+
+    def __str__(self):
+        return self.nom
+
