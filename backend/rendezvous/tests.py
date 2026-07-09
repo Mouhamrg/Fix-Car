@@ -147,3 +147,15 @@ class RendezVousAPITests(APITestCase):
             self.url_liste, {"date_heure": date_future().isoformat()}
         )
         self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_date_hors_creneau_de_15_minutes_refusee(self):
+        self.client.force_authenticate(self.client_a)
+        date_invalide = (timezone.now() + timedelta(days=3)).replace(
+            minute=7, second=0, microsecond=0
+        )
+        reponse = self.client.post(
+            self.url_liste,
+            {"date_heure": date_invalide.isoformat(), "motif": "Créneau bancal"},
+        )
+        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)

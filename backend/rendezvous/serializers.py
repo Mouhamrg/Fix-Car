@@ -32,6 +32,10 @@ class RendezVousSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "La date du rendez-vous doit être dans le futur."
             )
+        if valeur.minute % 15 != 0 or valeur.second != 0:
+            raise serializers.ValidationError(
+                "Les rendez-vous se prennent aux 15 minutes (ex. 13 h 00, 13 h 15)."
+            )
         return valeur
 
     def validate(self, donnees):
