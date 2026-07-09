@@ -1,3 +1,29 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
+
+class Utilisateur(AbstractUser):
+    """Modèle utilisateur personnalisé avec rôle."""
+
+    class Role(models.TextChoices):
+        CLIENT = 'client', 'Client'
+        MECANICIEN = 'mecanicien', 'Mécanicien'
+        GESTIONNAIRE = 'gestionnaire', 'Gestionnaire'
+        ADMINISTRATEUR = 'administrateur', 'Administrateur'
+
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.CLIENT,
+    )
+    telephone = models.CharField(max_length=20, blank=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date_joined']
+        verbose_name = 'Utilisateur'
+        verbose_name_plural = 'Utilisateurs'
+
+    def __str__(self):
+        return f"{self.username} ({self.role})"

@@ -156,3 +156,4 @@ CORS_ALLOWED_ORIGINS = [
 
 # Modèle utilisateur personnalisé
 AUTH_USER_MODEL = 'comptes.Utilisateur'
+
