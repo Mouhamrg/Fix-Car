@@ -11,7 +11,8 @@ Utilisateur = get_user_model()
 
 
 def date_future(jours=3):
-    return timezone.now() + timedelta(days=jours)
+    d = timezone.now() + timedelta(days=jours)
+    return d.replace(minute=0, second=0, microsecond=0)
 
 
 class RendezVousAPITests(APITestCase):
