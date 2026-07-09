@@ -70,10 +70,20 @@ entity "TypeReparation" as type_reparation {
   actif : booleen
 }
 
-entity "Affectation" as affectation {
+entity "Reparation" as reparation {
   * id : entier <<PK>>
   --
   * demande_id : entier <<FK DemandeReparation>>
+  * createur_id : entier <<FK Utilisateur>>
+  titre : chaine
+  description : texte
+  statut : enum {a_faire, en_cours,\nterminee, annulee}
+}
+
+entity "Affectation" as affectation {
+  * id : entier <<PK>>
+  --
+  * reparation_id : entier <<FK Reparation>>
   * mecanicien_id : entier <<FK Utilisateur>>
   * gestionnaire_id : entier <<FK Utilisateur>>
   date_affectation : date
@@ -83,7 +93,7 @@ entity "Affectation" as affectation {
 entity "Intervention" as intervention {
   * id : entier <<PK>>
   --
-  * demande_id : entier <<FK DemandeReparation>>
+  * reparation_id : entier <<FK Reparation>>
   * mecanicien_id : entier <<FK Utilisateur>>
   titre : chaine
   description : texte
@@ -164,10 +174,12 @@ rendez_vous |o--o| demande : donne lieu à
 demande ||--o| diagnostic : reçoit
 utilisateur ||--o{ diagnostic : rédige (mécanicien)
 diagnostic }o--o{ type_reparation : préconise
-demande ||--o{ affectation : est assignée via
+demande ||--o{ reparation : engendre
+utilisateur ||--o{ reparation : crée (mécanicien ou gestionnaire)
+reparation ||--o{ affectation : est assignée via
 utilisateur ||--o{ affectation : reçoit (mécanicien)
 utilisateur ||--o{ affectation : décide (gestionnaire)
-demande ||--o{ intervention : est traitée par
+reparation ||--o{ intervention : est traitée par
 utilisateur ||--o{ intervention : effectue (mécanicien)
 intervention ||--o{ ligne_piece : consomme
 piece ||--o{ ligne_piece : est utilisée dans

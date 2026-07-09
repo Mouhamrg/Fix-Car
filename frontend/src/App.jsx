@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage.jsx'
+import DemandesPage from './pages/DemandesPage.jsx'
+import InterventionsPage from './pages/InterventionsPage.jsx'
 import { isAuthenticated } from './api/client.js'
 import RendezVousPage from './pages/RendezVousPage.jsx'
 
@@ -32,6 +34,22 @@ function App() {
                 </ProtectedRoute>
             }
         />
+      <Route
+        path="/demandes"
+        element={
+          <ProtectedRoute>
+            <DemandesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/interventions"
+        element={
+          <ProtectedRoute>
+            <InterventionsPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }
