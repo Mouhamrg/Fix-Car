@@ -1,0 +1,294 @@
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  Alert,
+  Badge,
+  Button,
+  Group,
+  Loader,
+  Modal,
+  Select,
+  Table,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
+import AppLayout from '../components/AppLayout.jsx'
+import api from '../api/client.js'
+import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
+
+const formVide = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  telephone: '',
+  role: 'client',
+}
+
+export default function ProfilPage() {
+  const queryClient = useQueryClient()
+  const [modalOuvert, setModalOuvert] = useState(false)
+  const [enEdition, setEnEdition] = useState(null)
+  const [form, setForm] = useState(formVide)
+  const [erreur, setErreur] = useState(null)
+  const [filtreRole, setFiltreRole] = useState('')
+
+  const { data: moi } = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => (await api.get('/api/me/')).data,
+  })
+
+  const { data: comptes, isLoading } = useQuery({
+    queryKey: ['comptes', filtreRole],
+    queryFn: () => listComptes(filtreRole),
+  })
+
+  function surSucces() {
+    queryClient.invalidateQueries({ queryKey: ['comptes'] })
+    fermerModal()
+  }
+
+  function surErreur(err) {
+    const details = err.response?.data
+    setErreur(
+      details && typeof details === 'object'
+        ? Object.entries(details)
+            .map(([champ, messages]) => `${champ} : ${[].concat(messages).join(' ')}`)
+            .join(' — ')
+        : "L'enregistrement a échoué. Réessayez.",
+    )
+  }
+
+  const modification = useMutation({
+    mutationFn: ({ id, ...donnees }) => updateCompte(id, donnees),
+    onSuccess: surSucces,
+    onError: surErreur,
+  })
+
+  const suppression = useMutation({
+    mutationFn: supprimerMonCompte,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
+  })
+
+  const desactivation = useMutation({
+    mutationFn: desactiverCompte,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
+  })
+
+  const reactivation = useMutation({
+    mutationFn: reactiverCompte,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
+  })
+
+  function ouvrirEdition(compte) {
+    setEnEdition(compte)
+    setForm({
+      first_name: compte.first_name,
+      last_name: compte.last_name,
+      email: compte.email,
+      telephone: compte.telephone,
+      role: compte.role,
+    })
+    setErreur(null)
+    setModalOuvert(true)
+  }
+
+  function fermerModal() {
+    setModalOuvert(false)
+    setEnEdition(null)
+    setErreur(null)
+  }
+
+  function soumettre(event) {
+    event.preventDefault()
+    modification.mutate({ id: enEdition.id, ...form })
+  }
+
+  function desactiver(compte) {
+    if (window.confirm(`Désactiver le compte « ${compte.username} » ?`)) {
+      desactivation.mutate(compte.id)
+    }
+  }
+
+  function supprimerCompte(compte) {
+    if (window.confirm(`Supprimer votre compte « ${compte.username} » ? Cette action est irréversible.`)) {
+      suppression.mutate(compte.id)
+    }
+  }
+
+  function reactiver(compte) {
+    if (window.confirm(`Réactiver le compte « ${compte.username} » ?`)) {
+      reactivation.mutate(compte.id)
+    }
+  }
+
+  function champ(nom, valeur) {
+    setForm((precedent) => ({ ...precedent, [nom]: valeur }))
+  }
+
+  const lignes = (comptes ?? []).map((compte) => (
+    <Table.Tr key={compte.id}>
+      <Table.Td fw={600}>{compte.username}</Table.Td>
+      <Table.Td>{compte.first_name} {compte.last_name}</Table.Td>
+      <Table.Td>{compte.email}</Table.Td>
+      <Table.Td>{compte.telephone}</Table.Td>
+      <Table.Td>
+        <Badge
+          variant={compte.is_active ? 'filled' : 'outline'}
+          color="mono.9"
+        >
+          {compte.is_active ? 'Actif' : 'Inactif'}
+        </Badge>
+      </Table.Td>
+      <Table.Td>{compte.role}</Table.Td>
+      <Table.Td>
+        <Group gap="xs" wrap="nowrap">
+          {(moi?.id === compte.id) && (
+            <Button
+              size="compact-sm"
+              variant="outline"
+              onClick={() => ouvrirEdition(compte)}
+            >
+              Modifier
+            </Button>
+          )}
+          {moi?.id === compte.id && compte.is_active && (
+            <Button
+              size="compact-sm"
+              variant="subtle"
+              onClick={() => supprimerCompte(compte)}
+            >
+              Supprimer mon compte
+            </Button>
+          )}
+          {moi?.role === 'administrateur' && compte.is_active && (
+            <Button
+              size="compact-sm"
+              variant="subtle"
+              onClick={() => desactiver(compte)}
+            >
+              Désactiver
+            </Button>
+          )}
+
+          {moi?.role === 'administrateur' && !compte.is_active && (
+            <Button
+              size="compact-sm"
+              variant="outline"
+              onClick={() => reactiver(compte)}
+            >
+              Réactiver
+            </Button>
+          )}
+        </Group>
+      </Table.Td>
+    </Table.Tr>
+  ))
+
+  return (
+    <AppLayout>
+      <Group justify="space-between" mb="lg">
+        <Title order={2}>Gestion des comptes utilisateurs</Title>
+      </Group>
+
+      <Group mb="md">
+        <Select
+          placeholder="Filtrer par rôle"
+          value={filtreRole}
+          onChange={(val) => setFiltreRole(val ?? '')}
+          data={[
+            { value: 'client', label: 'Client' },
+            { value: 'mecanicien', label: 'Mécanicien' },
+            { value: 'gestionnaire', label: 'Gestionnaire' },
+            { value: 'administrateur', label: 'Administrateur' },
+          ]}
+          clearable
+        />
+      </Group>
+
+      {isLoading ? (
+        <Loader color="black" />
+      ) : lignes.length === 0 ? (
+        <Text>Aucun compte enregistré.</Text>
+      ) : (
+        <Table withTableBorder withColumnBorders style={{ borderColor: '#000' }}>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Nom d'utilisateur</Table.Th>
+              <Table.Th>Nom complet</Table.Th>
+              <Table.Th>Courriel</Table.Th>
+              <Table.Th>Téléphone</Table.Th>
+              <Table.Th>Statut</Table.Th>
+              <Table.Th>Rôle</Table.Th>
+              <Table.Th>Actions</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{lignes}</Table.Tbody>
+        </Table>
+      )}
+
+      <Modal
+        opened={modalOuvert}
+        onClose={fermerModal}
+        title="Modifier mon profil"
+        centered
+      >
+        <form onSubmit={soumettre}>
+          {erreur && (
+            <Alert color="mono.9" variant="outline" mb="md">
+              {erreur}
+            </Alert>
+          )}
+          <TextInput
+            label="Prénom"
+            value={form.first_name}
+            onChange={(e) => champ('first_name', e.target.value)}
+            required
+          />
+          <TextInput
+            label="Nom"
+            value={form.last_name}
+            onChange={(e) => champ('last_name', e.target.value)}
+            required
+            mt="sm"
+          />
+          <TextInput
+            label="Courriel"
+            type="email"
+            value={form.email}
+            onChange={(e) => champ('email', e.target.value)}
+            required
+            mt="sm"
+          />
+          <TextInput
+            label="Téléphone"
+            value={form.telephone}
+            onChange={(e) => champ('telephone', e.target.value)}
+            mt="sm"
+          />
+          <Select
+            label="Rôle"
+            value={form.role}
+            onChange={(valeur) => champ('role', valeur)}
+            data={[
+              { value: 'client', label: 'Client' },
+              { value: 'mecanicien', label: 'Mécanicien' },
+              { value: 'gestionnaire', label: 'Gestionnaire' },
+              { value: 'administrateur', label: 'Administrateur' },
+            ]}
+            allowDeselect={false}
+            mt="sm"
+          />
+          <Group justify="flex-end" mt="lg">
+            <Button variant="outline" onClick={fermerModal}>
+              Annuler
+            </Button>
+            <Button type="submit" loading={modification.isPending}>
+              Enregistrer
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+    </AppLayout>
+  )
+}

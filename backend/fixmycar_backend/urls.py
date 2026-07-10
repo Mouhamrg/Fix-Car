@@ -31,4 +31,5 @@ urlpatterns = [
     path('api/', include('rendezvous.urls')),
     path('api/', include('reparations.urls')),
     path('api/', include('interventions.urls')),
+    path('api/', include('comptes.urls')),
 ]
