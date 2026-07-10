@@ -1,9 +1,11 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import Utilisateur
 
-@admin.register(Utilisateur)
-class UtilisateurAdmin(UserAdmin):
-    list_display = ['username', 'email', 'role', 'is_active']
-    fieldsets = UserAdmin.fieldsets + (
-        ('Informations supplémentaires', {'fields': ('role', 'telephone')}),)
+from .models import Profil
+
+
+@admin.register(Profil)
+class ProfilAdmin(admin.ModelAdmin):
+    list_display = ("user", "role", "telephone", "ville", "date_creation")
+    list_filter = ("role", "ville")
+    search_fields = ("user__username", "user__email", "telephone")
+    autocomplete_fields = ("user",)

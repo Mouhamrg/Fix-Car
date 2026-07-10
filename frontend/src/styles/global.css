@@ -1,0 +1,683 @@
+@import "./tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--line) 0.6px, transparent 0.6px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 28px;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+a {
+  color: var(--accent);
+}
+
+p {
+  color: var(--ink-muted);
+}
+
+/* ---------- Layout ---------- */
+
+.mise-en-page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.conteneur {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.contenu-principal {
+  flex: 1;
+  padding: 40px 0 64px;
+}
+
+.entete-page {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.entete-page p {
+  margin: 4px 0 0;
+}
+
+/* ---------- Barre de navigation ---------- */
+
+.barre-nav {
+  border-bottom: 1px solid var(--line);
+  background-color: rgba(28, 39, 51, 0.9);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.barre-nav__interieur {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.marque {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+
+.marque__pastille {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(242, 169, 60, 0.2);
+}
+
+.nav-liens {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.nav-liens a {
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.nav-liens a:hover,
+.nav-liens a.actif {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.nav-compte {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.badge-role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-muted);
+}
+
+/* ---------- Boutons ---------- */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.bouton:active {
+  transform: translateY(1px);
+}
+
+.bouton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.bouton--principal {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.bouton--principal:hover {
+  background: var(--accent-muted);
+}
+
+.bouton--discret {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.bouton--discret:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bouton--danger {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.bouton--danger:hover {
+  background: var(--danger);
+  color: var(--danger-ink);
+}
+
+.bouton--pleine-largeur {
+  width: 100%;
+}
+
+.bouton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------- Formulaires ---------- */
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.grille-champs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 640px) {
+  .grille-champs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.champ label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+
+.champ input,
+.champ select {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.champ input:focus,
+.champ select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.champ--erreur input,
+.champ--erreur select {
+  border-color: var(--danger);
+}
+
+.message-erreur-champ {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.texte-aide {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---------- Cartes / conteneurs ---------- */
+
+.carte {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.carte-etroite {
+  max-width: 420px;
+  margin: 64px auto;
+}
+
+/* ---------- Alertes ---------- */
+
+.alerte {
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.alerte--erreur {
+  background: rgba(228, 87, 46, 0.12);
+  border-color: rgba(228, 87, 46, 0.4);
+  color: #f4a487;
+}
+
+.alerte--succes {
+  background: rgba(79, 184, 166, 0.12);
+  border-color: rgba(79, 184, 166, 0.4);
+  color: #8fd9cc;
+}
+
+/* ---------- Fiche véhicule (élément signature) ---------- */
+
+.grille-vehicules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.fiche-vehicule {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fiche-vehicule::before,
+.fiche-vehicule::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.fiche-vehicule::before {
+  left: 10px;
+}
+
+.fiche-vehicule::after {
+  right: 10px;
+}
+
+.fiche-vehicule--inactif {
+  opacity: 0.55;
+}
+
+.fiche-vehicule__entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.fiche-vehicule__titre {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.fiche-vehicule__sous-titre {
+  color: var(--ink-faint);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.plaque {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.fiche-vehicule__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  font-size: 13px;
+}
+
+.fiche-vehicule__meta dt {
+  color: var(--ink-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.fiche-vehicule__meta dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.fiche-vehicule__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.etat-actif {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.etat-actif--oui {
+  background: rgba(79, 184, 166, 0.15);
+  color: var(--success);
+}
+
+.etat-actif--non {
+  background: rgba(228, 87, 46, 0.15);
+  color: var(--danger);
+}
+
+/* ---------- Badges de statut (demandes de réparation) ---------- */
+
+.badge-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-statut::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge-statut--attente {
+  background: rgba(242, 169, 60, 0.15);
+  color: var(--accent);
+}
+
+.badge-statut--traitement {
+  background: rgba(79, 184, 166, 0.15);
+  color: var(--success);
+}
+
+.badge-statut--terminee {
+  background: rgba(158, 176, 194, 0.15);
+  color: var(--ink-muted);
+}
+
+.badge-statut--annulee {
+  background: rgba(228, 87, 46, 0.15);
+  color: var(--danger);
+}
+
+/* ---------- Fiche demande de réparation ---------- */
+
+.grille-demandes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.fiche-demande {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fiche-demande__entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.fiche-demande__titre {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.fiche-demande__vehicule {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.fiche-demande__description {
+  font-size: 13px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.fiche-demande__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.bloc-devis {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bloc-devis__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.bloc-devis__montant {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* ---------- Affectations ---------- */
+
+.grille-affectations {
+  display: grid;
+  gap: 14px;
+}
+
+.fiche-affectation {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fiche-affectation__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fiche-affectation__titre {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.fiche-affectation__meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.fiche-affectation__mecanicien {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fiche-affectation__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liste-demandes-attente {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.ligne-demande-attente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--surface-2);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+
+.ligne-demande-attente__titre {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ligne-demande-attente__meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.puce-disponibilite {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.puce-disponibilite--oui {
+  background: var(--success);
+}
+
+.puce-disponibilite--non {
+  background: var(--ink-faint);
+}
+
+/* ---------- États divers ---------- */
+
+.etat-vide {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-faint);
+}
+
+.chargement {
+  color: var(--ink-faint);
+  font-size: 14px;
+  padding: 40px 0;
+  text-align: center;
+}

@@ -2,4 +2,9 @@ from django.apps import AppConfig
 
 
 class ComptesConfig(AppConfig):
-    name = 'comptes'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "comptes"
+    verbose_name = "Gestion des comptes utilisateurs"
+
+    def ready(self):
+        import comptes.signals  # noqa: F401
