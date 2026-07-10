@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
-import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte } from '../api/comptes.js'
+import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
 
 const formVide = {
   first_name: '',
@@ -31,6 +31,7 @@ export default function ProfilPage() {
   const [enEdition, setEnEdition] = useState(null)
   const [form, setForm] = useState(formVide)
   const [erreur, setErreur] = useState(null)
+  const [filtreRole, setFiltreRole] = useState('')
 
   const { data: moi } = useQuery({
     queryKey: ['me'],
@@ -38,8 +39,8 @@ export default function ProfilPage() {
   })
 
   const { data: comptes, isLoading } = useQuery({
-    queryKey: ['comptes'],
-    queryFn: listComptes,
+    queryKey: ['comptes', filtreRole],
+    queryFn: () => listComptes(filtreRole),
   })
 
   function surSucces() {
@@ -71,6 +72,11 @@ export default function ProfilPage() {
 
   const desactivation = useMutation({
     mutationFn: desactiverCompte,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
+  })
+
+  const reactivation = useMutation({
+    mutationFn: reactiverCompte,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
   })
 
@@ -107,6 +113,12 @@ export default function ProfilPage() {
   function supprimerCompte(compte) {
     if (window.confirm(`Supprimer votre compte « ${compte.username} » ? Cette action est irréversible.`)) {
       suppression.mutate(compte.id)
+    }
+  }
+
+  function reactiver(compte) {
+    if (window.confirm(`Réactiver le compte « ${compte.username} » ?`)) {
+      reactivation.mutate(compte.id)
     }
   }
 
@@ -158,6 +170,16 @@ export default function ProfilPage() {
               Désactiver
             </Button>
           )}
+
+          {moi?.role === 'administrateur' && !compte.is_active && (
+            <Button
+              size="compact-sm"
+              variant="outline"
+              onClick={() => reactiver(compte)}
+            >
+              Réactiver
+            </Button>
+          )}
         </Group>
       </Table.Td>
     </Table.Tr>
@@ -167,6 +189,21 @@ export default function ProfilPage() {
     <AppLayout>
       <Group justify="space-between" mb="lg">
         <Title order={2}>Gestion des comptes utilisateurs</Title>
+      </Group>
+
+      <Group mb="md">
+        <Select
+          placeholder="Filtrer par rôle"
+          value={filtreRole}
+          onChange={(val) => setFiltreRole(val ?? '')}
+          data={[
+            { value: 'client', label: 'Client' },
+            { value: 'mecanicien', label: 'Mécanicien' },
+            { value: 'gestionnaire', label: 'Gestionnaire' },
+            { value: 'administrateur', label: 'Administrateur' },
+          ]}
+          clearable
+        />
       </Group>
 
       {isLoading ? (

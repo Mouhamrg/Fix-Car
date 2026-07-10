@@ -45,3 +45,40 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
         utilisateur.is_active = False
         utilisateur.save()
         return Response({'statut': 'compte supprimé'})
+
+    @action(detail=True, methods=['patch'], url_path='changer-role')
+    def changer_role(self, request, pk=None):
+        utilisateur = self.get_object()
+        if request.user.role != 'administrateur':
+            return Response(
+                {'detail': 'Seul un administrateur peut changer le rôle.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        role = request.data.get('role')
+        if role not in [r[0] for r in Utilisateur.Role.choices]:
+            return Response(
+                {'detail': 'Rôle invalide.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        utilisateur.role = role
+        utilisateur.save()
+        return Response({'statut': f'rôle changé en {role}'})
+
+    @action(detail=True, methods=['patch'])
+    def reactiver(self, request, pk=None):
+        if request.user.role != 'administrateur':
+            return Response(
+                {'detail': 'Seul un administrateur peut réactiver un compte.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        utilisateur = self.get_object()
+        utilisateur.is_active = True
+        utilisateur.save()
+        return Response({'statut': 'compte réactivé'})
+
+    def get_queryset(self):
+        queryset = Utilisateur.objects.all()
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset

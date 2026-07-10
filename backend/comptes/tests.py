@@ -43,3 +43,45 @@ class UtilisateurTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
+
+    def test_changer_role_admin(self):
+        admin = Utilisateur.objects.create_user(
+            username='admin',
+            password='MotDePasse123!',
+            role='administrateur'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(
+            f'/api/comptes/{self.user.id}/changer-role/',
+            {'role': 'mecanicien'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.role, 'mecanicien')
+
+    def test_changer_role_non_admin(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(
+            f'/api/comptes/{self.user.id}/changer-role/',
+            {'role': 'mecanicien'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reactiver_compte(self):
+        admin = Utilisateur.objects.create_user(
+            username='admin2',
+            password='MotDePasse123!',
+            role='administrateur'
+        )
+        self.user.is_active = False
+        self.user.save()
+        self.client.force_authenticate(user=admin)
+        response = self.client.patch(f'/api/comptes/{self.user.id}/reactiver/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_active)
+
+    def test_filtrer_par_role(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/api/comptes/?role=client')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -16,6 +16,8 @@ vi.mock('../api/comptes.js', () => ({
   updateCompte: vi.fn(),
   desactiverCompte: vi.fn(),
   supprimerMonCompte: vi.fn(),
+  changerRole: vi.fn(),
+  reactiverCompte: vi.fn(),
 }))
 
 const moi = {
@@ -114,4 +116,28 @@ describe('ProfilPage', () => {
       expect(desactiverCompte).toHaveBeenCalledWith(2, expect.anything())
     })
   })
+  it('affiche le bouton Réactiver pour les comptes inactifs (admin)', async () => {
+    const compteInactif = { ...autreCompte, is_active: false }
+    listComptes.mockResolvedValue([moi, compteInactif])
+    rendreAvecProviders(<ProfilPage />)
+    await screen.findByText('marie')
+
+    const ligneAutre = within(screen.getByText('marie').closest('tr'))
+    await waitFor(() => {
+      expect(ligneAutre.getByRole('button', { name: 'Réactiver' })).toBeInTheDocument()
+    })
+  })
+
+  it('ne montre pas Désactiver pour un compte inactif', async () => {
+    const compteInactif = { ...autreCompte, is_active: false }
+    listComptes.mockResolvedValue([moi, compteInactif])
+    rendreAvecProviders(<ProfilPage />)
+    await screen.findByText('marie')
+
+    const ligneAutre = within(screen.getByText('marie').closest('tr'))
+    await waitFor(() => {
+      expect(ligneAutre.queryByRole('button', { name: 'Désactiver' })).toBeNull()
+    })
+  })
 })
+
