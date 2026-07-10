@@ -4,6 +4,7 @@ import { logout } from '../api/client.js'
 
 const links = [
   { to: '/', label: 'Accueil' },
+  { to: '/rendez-vous', label: 'Rendez-vous' },
   { to: '/demandes', label: 'Demandes de reparation' },
   { to: '/interventions', label: 'Interventions' },
   { to: '/types-reparations', label: 'Types de reparation' },

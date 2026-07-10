@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/me/', me, name='me'),
+    path('api/', include('rendezvous.urls')),
     path('api/', include('reparations.urls')),
     path('api/', include('interventions.urls')),
 ]

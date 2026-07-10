@@ -5,6 +5,8 @@ import DemandesPage from './pages/DemandesPage.jsx'
 import InterventionsPage from './pages/InterventionsPage.jsx'
 import TypesReparationsPage from './pages/TypesReparationsPage.jsx'
 import { isAuthenticated } from './api/client.js'
+import RendezVousPage from './pages/RendezVousPage.jsx'
+
 
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
@@ -25,6 +27,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+        <Route
+            path="/rendez-vous"
+            element={
+                <ProtectedRoute>
+                    <RendezVousPage />
+                </ProtectedRoute>
+            }
+        />
       <Route
         path="/demandes"
         element={
