@@ -265,10 +265,10 @@ class FiltrageMesDemandesTests(APITestCase):
     """Tests du parametre ?mes=1 ajoute par l'issue #5."""
 
     def setUp(self):
-        self.client_a = Utilisateur.objects.create_user(
+        self.client_a = User.objects.create_user(
             username='client_a', password='MotDePasse123!'
         )
-        self.client_b = Utilisateur.objects.create_user(
+        self.client_b = User.objects.create_user(
             username='client_b', password='MotDePasse123!'
         )
         DemandeReparation.objects.create(
