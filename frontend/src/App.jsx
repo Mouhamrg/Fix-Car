@@ -6,6 +6,7 @@ import InterventionsPage from './pages/InterventionsPage.jsx'
 import TypesReparationsPage from './pages/TypesReparationsPage.jsx'
 import { isAuthenticated } from './api/client.js'
 import RendezVousPage from './pages/RendezVousPage.jsx'
+import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
 import ProfilPage from './pages/ProfilPage.jsx'
 
 function ProtectedRoute({ children }) {
@@ -59,6 +60,15 @@ function App() {
           </ProtectedRoute>
         }
       />
+        <Route
+            path="/suivi-reparations"
+            element={
+                <ProtectedRoute>
+                    <SuiviReparationsPage />
+                </ProtectedRoute>
+            }
+        />
+
       <Route
         path="/profil"
         element={

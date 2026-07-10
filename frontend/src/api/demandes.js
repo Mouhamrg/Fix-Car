@@ -18,3 +18,8 @@ export async function updateDemande(id, demande) {
 export async function deleteDemande(id) {
   await api.delete(`/api/demandes/${id}/`)
 }
+
+export async function listMesDemandes() {
+  const { data } = await api.get('/api/demandes/?mes=1')
+  return data
+}
