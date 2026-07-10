@@ -15,6 +15,7 @@ vi.mock('../api/comptes.js', () => ({
   listComptes: vi.fn(),
   updateCompte: vi.fn(),
   desactiverCompte: vi.fn(),
+  supprimerMonCompte: vi.fn(),
 }))
 
 const moi = {

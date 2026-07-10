@@ -33,3 +33,15 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
         utilisateur.is_active = False
         utilisateur.save()
         return Response({'statut': 'compte désactivé'})
+
+    @action(detail=True, methods=['delete'], url_path='supprimer-mon-compte')
+    def supprimer_mon_compte(self, request, pk=None):
+        utilisateur = self.get_object()
+        if utilisateur.id != request.user.id:
+            return Response(
+                {'detail': 'Vous ne pouvez supprimer que votre propre compte.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        utilisateur.is_active = False
+        utilisateur.save()
+        return Response({'statut': 'compte supprimé'})

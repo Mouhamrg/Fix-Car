@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
-import { listComptes, updateCompte, desactiverCompte } from '../api/comptes.js'
+import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte } from '../api/comptes.js'
 
 const formVide = {
   first_name: '',
@@ -64,6 +64,11 @@ export default function ProfilPage() {
     onError: surErreur,
   })
 
+  const suppression = useMutation({
+    mutationFn: supprimerMonCompte,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
+  })
+
   const desactivation = useMutation({
     mutationFn: desactiverCompte,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
@@ -99,6 +104,12 @@ export default function ProfilPage() {
     }
   }
 
+  function supprimerCompte(compte) {
+    if (window.confirm(`Supprimer votre compte « ${compte.username} » ? Cette action est irréversible.`)) {
+      suppression.mutate(compte.id)
+    }
+  }
+
   function champ(nom, valeur) {
     setForm((precedent) => ({ ...precedent, [nom]: valeur }))
   }
@@ -127,6 +138,15 @@ export default function ProfilPage() {
               onClick={() => ouvrirEdition(compte)}
             >
               Modifier
+            </Button>
+          )}
+          {moi?.id === compte.id && compte.is_active && (
+            <Button
+              size="compact-sm"
+              variant="subtle"
+              onClick={() => supprimerCompte(compte)}
+            >
+              Supprimer mon compte
             </Button>
           )}
           {moi?.role === 'administrateur' && compte.is_active && (
