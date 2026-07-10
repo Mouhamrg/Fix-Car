@@ -22,9 +22,16 @@ class DemandeReparationViewSet(viewsets.ModelViewSet):
         EstClientAuteurOuLectureSeule,
     ]
 
+    def get_queryset(self):
+        """Par defaut : toutes les demandes (comportement documente de #4).
+        Avec ?mes=1 : uniquement celles du client connecte (#5, suivi)."""
+        queryset = super().get_queryset()
+        if self.request.query_params.get('mes') == '1':
+            queryset = queryset.filter(client=self.request.user)
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
-
 
 class TypeReparationViewSet(viewsets.ModelViewSet):
     queryset = TypeReparation.objects.all()

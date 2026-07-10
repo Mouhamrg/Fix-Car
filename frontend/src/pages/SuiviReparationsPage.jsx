@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Badge, Stack, Table, Text, Title } from '@mantine/core'
 import AppLayout from '../components/AppLayout.jsx'
-import { listDemandes } from '../api/demandes.js'
+import { listMesDemandes } from '../api/demandes.js'
 
 const LIBELLE_STATUT = {
     en_attente: 'En attente',
@@ -29,7 +29,7 @@ function BadgeStatut({ statut }) {
 export default function SuiviReparationsPage() {
     const { data: demandes = [], isPending } = useQuery({
         queryKey: ['demandes'],
-        queryFn: listDemandes,
+        queryFn: listMesDemandes,
     })
 
     return (

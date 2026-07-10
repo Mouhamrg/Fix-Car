@@ -259,3 +259,35 @@ class TypeReparationApiTests(APITestCase):
         self.assertFalse(
             TypeReparation.objects.filter(id=self.type_reparation.id).exists()
         )
+
+
+class FiltrageMesDemandesTests(APITestCase):
+    """Tests du parametre ?mes=1 ajoute par l'issue #5."""
+
+    def setUp(self):
+        self.client_a = Utilisateur.objects.create_user(
+            username='client_a', password='MotDePasse123!'
+        )
+        self.client_b = Utilisateur.objects.create_user(
+            username='client_b', password='MotDePasse123!'
+        )
+        DemandeReparation.objects.create(
+            titre='Freins', vehicule='Honda Civic', description='Bruit',
+            client=self.client_a,
+        )
+        DemandeReparation.objects.create(
+            titre='Embrayage', vehicule='Mazda 3', description='Patine',
+            client=self.client_b,
+        )
+
+    def test_sans_parametre_toutes_les_demandes_sont_visibles(self):
+        """Comportement historique de #4 preserve."""
+        self.client.force_authenticate(self.client_a)
+        reponse = self.client.get('/api/demandes/')
+        self.assertEqual(len(reponse.data), 2)
+
+    def test_avec_mes_1_seules_les_demandes_du_client_sont_visibles(self):
+        self.client.force_authenticate(self.client_a)
+        reponse = self.client.get('/api/demandes/?mes=1')
+        self.assertEqual(len(reponse.data), 1)
+        self.assertEqual(reponse.data[0]['titre'], 'Freins')
