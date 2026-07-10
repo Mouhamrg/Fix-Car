@@ -1,0 +1,29 @@
+:root {
+  /* Palette "plan technique d'atelier" */
+  --bg: #141d27;
+  --surface: #1c2733;
+  --surface-2: #24313f;
+  --line: #33465a;
+  --line-strong: #46617a;
+
+  --ink: #eef1f4;
+  --ink-muted: #9db0c2;
+  --ink-faint: #6c8098;
+
+  --accent: #f2a93c;
+  --accent-ink: #241a08;
+  --accent-muted: #c98a2c;
+
+  --success: #4fb8a6;
+  --success-ink: #08211d;
+  --danger: #e4572e;
+  --danger-ink: #2a0d05;
+
+  --font-display: "Oswald", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
