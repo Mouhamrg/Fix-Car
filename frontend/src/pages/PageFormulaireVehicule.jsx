@@ -189,7 +189,7 @@ export default function PageFormulaireVehicule() {
             <button
               type="button"
               className="bouton bouton--discret"
-              onClick={() => navigate("/api/vehicules")}
+              onClick={() => navigate("/vehicules")}
             >
               Annuler
             </button>

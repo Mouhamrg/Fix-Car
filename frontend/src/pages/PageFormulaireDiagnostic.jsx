@@ -88,7 +88,7 @@ export default function PageFormulaireDiagnostic() {
   return (
     <AppLayout>
       <div className="entete-page">
-        <h1>{modeEdition ? "Diagnostic et devis" : "Nouveau diagnostic"}</h1>
+        <h1>{modeEdition ? "Diagnostic et devis" : "Nouveau diagnostic"} </h1>
       </div>
 
       <div className="carte" style={{ maxWidth: 640 }}>
