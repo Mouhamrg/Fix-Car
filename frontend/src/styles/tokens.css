@@ -1,23 +1,27 @@
 :root {
-  /* Palette "plan technique d'atelier" */
-  /*--bg: #141d27;*/
-  --surface: #1c2733;
-  --surface-2: #24313f;
-  --line: #33465a;
-  --line-strong: #46617a;
+  /* Palette monochrome (noir et blanc), alignée sur le thème Mantine (theme.js)
+     pour un rendu uniforme dans toute l'application. */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f8f8f8;
+  --line: #dddddd;
+  --line-strong: #000000;
 
-  --ink: #eef1f4;
-  --ink-muted: #9db0c2;
-  --ink-faint: #6c8098;
+  /* Trame de fond discrète (points) */
+  --dot: #ececec;
 
-  --accent: #f2a93c;
-  --accent-ink: #241a08;
-  --accent-muted: #c98a2c;
+  --ink: #151515;
+  --ink-muted: #666666;
+  --ink-faint: #999999;
 
-  --success: #4fb8a6;
-  --success-ink: #08211d;
-  --danger: #e4572e;
-  --danger-ink: #2a0d05;
+  --accent: #000000;
+  --accent-ink: #ffffff;
+  --accent-muted: #2a2a2a;
+
+  --success: #444444;
+  --success-ink: #ffffff;
+  --danger: #151515;
+  --danger-ink: #ffffff;
 
   --font-display: "Oswald", sans-serif;
   --font-body: "Inter", sans-serif;
