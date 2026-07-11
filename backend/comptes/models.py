@@ -5,11 +5,12 @@ from django.db import models
 class Utilisateur(AbstractUser):
     """Modèle utilisateur personnalisé avec rôle."""
 
+
     class Role(models.TextChoices):
-        CLIENT = 'client', 'Client'
-        MECANICIEN = 'mecanicien', 'Mécanicien'
-        GESTIONNAIRE = 'gestionnaire', 'Gestionnaire'
-        ADMINISTRATEUR = 'administrateur', 'Administrateur'
+        CLIENT = "CLIENT", "Client"
+        MECANICIEN = "MECANICIEN", "Mécanicien"
+        GESTIONNAIRE = "GESTIONNAIRE", "Gestionnaire"
+        ADMINISTRATEUR = "ADMINISTRATEUR", "Administrateur"
 
     role = models.CharField(
         max_length=20,
