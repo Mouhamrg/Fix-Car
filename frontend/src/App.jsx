@@ -9,6 +9,9 @@ import RendezVousPage from './pages/RendezVousPage.jsx'
 import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
 import ProfilPage from './pages/ProfilPage.jsx'
 
+import PageVehicules from "./pages/PageVehicules";
+import PageFormulaireVehicule from "./pages/PageFormulaireVehicule";
+
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
     return <Navigate to="/login" replace />
@@ -77,6 +80,9 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/vehicules" element={<ProtectedRoute><PageVehicules /></ProtectedRoute> } />
+      <Route path="/vehicules/nouveau" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
+      <Route path="/vehicules/:id/modifier" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
     </Routes>
   )
 }

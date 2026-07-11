@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,12 +42,13 @@ INSTALLED_APPS = [
     # Tierces parties
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
+    
     # Apps du projet
     'rendezvous',
     'reparations',
     'interventions',
     'comptes',
+    'vehicules',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +154,8 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
 ]
 
 # Modèle utilisateur personnalisé
