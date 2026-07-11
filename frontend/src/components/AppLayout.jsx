@@ -4,10 +4,13 @@ import { logout } from '../api/client.js'
 
 const links = [
   { to: '/', label: 'Accueil' },
+  { to: '/vehicules', label: 'Véhicules' },
   { to: '/rendez-vous', label: 'Rendez-vous' },
   { to: '/demandes', label: 'Demandes de reparation' },
+  { to: '/demandes', label: 'Diagnostics' },
   { to: '/interventions', label: 'Interventions' },
   { to: '/types-reparations', label: 'Types de reparation' },
+  { to: '/suivi-reparations', label: 'Suivi des réparations' },
   { to: '/profil', label: 'Comptes utilisateurs' },
 ]
 
