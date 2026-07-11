@@ -31,8 +31,6 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,20 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Tierces parties
     'rest_framework',
-    #'rest_framework_simplejwt',
+    'rest_framework_simplejwt',
     'corsheaders',
-
     # Apps du projet
     'rendezvous',
-    #'reparations',
+    'reparations',
     'interventions',
-    # Mes apps
-    "django_filters",
-    "vehicules",
-    "comptes",
-    "demandes_reparation",
-    "affectations",
-    "diagnostics",
+    'comptes',
 ]
 
 MIDDLEWARE = [
@@ -140,26 +131,18 @@ STATIC_URL = 'static/'
 # Django REST Framework
 # https://www.django-rest-framework.org/
 
-
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        # ex: "rest_framework_simplejwt.authentication.JWTAuthentication",
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
+    ),
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 
@@ -172,5 +155,5 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Modèle utilisateur personnalisé
-#AUTH_USER_MODEL = 'comptes.Utilisateur'
+AUTH_USER_MODEL = 'comptes.Utilisateur'
 

@@ -1,75 +1,84 @@
-from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-from .models import Profil
-from .serializers import (
-    ChangerMotDePasseSerializer,
-    InscriptionSerializer,
-    MonTokenObtainPairSerializer,
-    ProfilSerializer,
-)
+from .models import Utilisateur
+from .serializers import UtilisateurSerializer, InscriptionSerializer
 
 
-class MonTokenObtainPairView(TokenObtainPairView):
-    """
-    POST /api/auth/connexion/
-    Corps attendu : { "username": "...", "password": "..." }
-    Réponse : { "access": "...", "refresh": "...", "user": {...} }
-    """
+class UtilisateurViewSet(viewsets.ModelViewSet):
+    queryset = Utilisateur.objects.all()
+    serializer_class = UtilisateurSerializer
 
-    serializer_class = MonTokenObtainPairSerializer
+    def get_permissions(self):
+        if self.action == 'inscription':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
+    def get_serializer_class(self):
+        if self.action == 'inscription':
+            return InscriptionSerializer
+        return UtilisateurSerializer
 
-class InscriptionView(generics.CreateAPIView):
-    """
-    POST /api/comptes/inscription/
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def inscription(self, request):
+        serializer = InscriptionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    Endpoint public (aucune authentification requise) permettant à un
-    client de créer son compte. Le rôle est automatiquement CLIENT.
-    """
+    @action(detail=True, methods=['patch'])
+    def desactiver(self, request, pk=None):
+        utilisateur = self.get_object()
+        utilisateur.is_active = False
+        utilisateur.save()
+        return Response({'statut': 'compte désactivé'})
 
-    serializer_class = InscriptionSerializer
-    permission_classes = [AllowAny]
+    @action(detail=True, methods=['delete'], url_path='supprimer-mon-compte')
+    def supprimer_mon_compte(self, request, pk=None):
+        utilisateur = self.get_object()
+        if utilisateur.id != request.user.id:
+            return Response(
+                {'detail': 'Vous ne pouvez supprimer que votre propre compte.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        utilisateur.is_active = False
+        utilisateur.save()
+        return Response({'statut': 'compte supprimé'})
 
+    @action(detail=True, methods=['patch'], url_path='changer-role')
+    def changer_role(self, request, pk=None):
+        utilisateur = self.get_object()
+        if request.user.role != 'administrateur':
+            return Response(
+                {'detail': 'Seul un administrateur peut changer le rôle.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        role = request.data.get('role')
+        if role not in [r[0] for r in Utilisateur.Role.choices]:
+            return Response(
+                {'detail': 'Rôle invalide.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        utilisateur.role = role
+        utilisateur.save()
+        return Response({'statut': f'rôle changé en {role}'})
 
-class MonProfilView(generics.RetrieveUpdateAPIView):
-    """
-    GET   /api/comptes/profil/  -> consulter son propre profil
-    PUT   /api/comptes/profil/  -> mise à jour complète
-    PATCH /api/comptes/profil/  -> mise à jour partielle
+    @action(detail=True, methods=['patch'])
+    def reactiver(self, request, pk=None):
+        if request.user.role != 'administrateur':
+            return Response(
+                {'detail': 'Seul un administrateur peut réactiver un compte.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        utilisateur = self.get_object()
+        utilisateur.is_active = True
+        utilisateur.save()
+        return Response({'statut': 'compte réactivé'})
 
-    Un utilisateur ne peut consulter/modifier que son propre profil :
-    il n'y a pas de paramètre {id} dans l'URL, get_object() renvoie
-    toujours request.user.profil.
-    """
-
-    serializer_class = ProfilSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        # get_or_create couvre le cas des comptes déjà existants avant
-        # l'ajout de ce module (ex: superuser créé via createsuperuser).
-        profil, _ = Profil.objects.get_or_create(user=self.request.user)
-        return profil
-
-
-class ChangerMotDePasseView(APIView):
-    """
-    POST /api/comptes/changer-mot-de-passe/
-    Corps attendu : ancien_mot_de_passe, nouveau_mot_de_passe, nouveau_mot_de_passe2
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = ChangerMotDePasseSerializer(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {"detail": "Mot de passe modifié avec succès."}, status=status.HTTP_200_OK
-        )
+    def get_queryset(self):
+        queryset = Utilisateur.objects.all()
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset
