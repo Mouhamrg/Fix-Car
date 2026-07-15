@@ -9,6 +9,7 @@ import RendezVousPage from './pages/RendezVousPage.jsx'
 import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
 import PageFormulaireDiagnostic from "./pages/PageFormulaireDiagnostic";
 import ProfilPage from './pages/ProfilPage.jsx'
+import InscriptionPage from './pages/InscriptionPage.jsx'
 
 import PageVehicules from "./pages/PageVehicules";
 import PageFormulaireVehicule from "./pages/PageFormulaireVehicule";
@@ -24,6 +25,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/inscription" element={<InscriptionPage />} />
       <Route
         path="/"
         element={
