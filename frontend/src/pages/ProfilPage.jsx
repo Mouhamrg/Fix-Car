@@ -16,6 +16,7 @@ import {
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
 import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
+import { Navigate } from 'react-router-dom'
 
 const formVide = {
   first_name: '',
@@ -184,6 +185,14 @@ export default function ProfilPage() {
       </Table.Td>
     </Table.Tr>
   ))
+
+  if (moi && moi.role !== 'ADMINISTRATEUR') {
+    return <Navigate to="/" replace />
+  }
+
+ if (moi && moi.role !== 'ADMINISTRATEUR') {
+    return <Navigate to="/" replace />
+  }
 
   return (
     <AppLayout>
