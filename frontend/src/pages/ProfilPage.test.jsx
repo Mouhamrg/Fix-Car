@@ -20,6 +20,10 @@ vi.mock('../api/comptes.js', () => ({
   reactiverCompte: vi.fn(),
 }))
 
+vi.mock('../components/AppLayout.jsx', () => ({
+  default: ({ children }) => <div>{children}</div>,
+}))
+
 const moi = {
   id: 1,
   username: 'Aboubacar',
@@ -27,7 +31,7 @@ const moi = {
   last_name: 'Niang',
   email: 'test@test.com',
   telephone: '1234567890',
-  role: 'administrateur',
+  role: 'ADMINISTRATEUR',
   is_active: true,
 }
 
