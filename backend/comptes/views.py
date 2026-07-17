@@ -4,6 +4,25 @@ from rest_framework.response import Response
 from .models import Utilisateur
 from .serializers import UtilisateurSerializer, InscriptionSerializer
 
+class EstProprietaireOuAdmin(permissions.BasePermission):
+    """Un utilisateur peut modifier son propre compte.
+    Un administrateur peut modifier n'importe quel compte."""
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.role == Utilisateur.Role.ADMINISTRATEUR:
+            return True
+        return obj.id == request.user.id
+
+class EstAdmin(permissions.BasePermission):
+    """Seul un administrateur peut effectuer cette action."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role == Utilisateur.Role.ADMINISTRATEUR
+        )
 
 class UtilisateurViewSet(viewsets.ModelViewSet):
     queryset = Utilisateur.objects.all()
@@ -12,12 +31,38 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'inscription':
             return [permissions.AllowAny()]
+        if self.action in ['update', 'partial_update']:
+            return [permissions.IsAuthenticated(), EstProprietaireOuAdmin()]
+        if self.action == 'destroy':
+            return [permissions.IsAuthenticated(), EstAdmin()]
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action == 'inscription':
             return InscriptionSerializer
         return UtilisateurSerializer
+
+    def _nettoyer_donnees_modifiables(self, request):
+        """role et is_active ne passent jamais par la mise à jour générique :
+        ils ont leurs propres actions (changer-role, desactiver, reactiver)
+        avec leur propre contrôle d'accès."""
+        donnees = request.data.copy()
+        donnees.pop('role', None)
+        donnees.pop('is_active', None)
+        return donnees
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        donnees = self._nettoyer_donnees_modifiables(request)
+        serializer = self.get_serializer(instance, data=donnees, partial=kwargs.get('partial', False))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def inscription(self, request):
@@ -29,6 +74,11 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'])
     def desactiver(self, request, pk=None):
+        if request.user.role != Utilisateur.Role.ADMINISTRATEUR:
+            return Response(
+                {'detail': 'Seul un administrateur peut désactiver un compte.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         utilisateur = self.get_object()
         utilisateur.is_active = False
         utilisateur.save()
@@ -49,7 +99,7 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'], url_path='changer-role')
     def changer_role(self, request, pk=None):
         utilisateur = self.get_object()
-        if request.user.role != 'administrateur':
+        if request.user.role != Utilisateur.Role.ADMINISTRATEUR:
             return Response(
                 {'detail': 'Seul un administrateur peut changer le rôle.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -66,7 +116,7 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'])
     def reactiver(self, request, pk=None):
-        if request.user.role != 'administrateur':
+        if request.user.role != Utilisateur.Role.ADMINISTRATEUR:
             return Response(
                 {'detail': 'Seul un administrateur peut réactiver un compte.'},
                 status=status.HTTP_403_FORBIDDEN

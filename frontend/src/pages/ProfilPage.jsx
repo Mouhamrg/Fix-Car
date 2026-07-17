@@ -15,14 +15,15 @@ import {
 } from '@mantine/core'
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
-import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
+import { Navigate } from 'react-router-dom'
+import { listComptes, getCompte, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
 
 const formVide = {
   first_name: '',
   last_name: '',
   email: '',
   telephone: '',
-  role: 'client',
+  role: 'CLIENT',
 }
 
 export default function ProfilPage() {
@@ -38,9 +39,16 @@ export default function ProfilPage() {
     queryFn: async () => (await api.get('/api/me/')).data,
   })
 
+  const estAdmin = moi?.role === 'ADMINISTRATEUR'
+
   const { data: comptes, isLoading } = useQuery({
     queryKey: ['comptes', filtreRole],
-    queryFn: () => listComptes(filtreRole),
+    queryFn: async () => {
+      if (estAdmin) return listComptes(filtreRole)
+      if (!moi) return []
+      const compte = await getCompte(moi.id)
+      return [compte]
+    },
   })
 
   function surSucces() {
@@ -161,7 +169,7 @@ export default function ProfilPage() {
               Supprimer mon compte
             </Button>
           )}
-          {moi?.role === 'administrateur' && compte.is_active && (
+          {moi?.role === 'ADMINISTRATEUR' && compte.is_active && (
             <Button
               size="compact-sm"
               variant="subtle"
@@ -171,7 +179,7 @@ export default function ProfilPage() {
             </Button>
           )}
 
-          {moi?.role === 'administrateur' && !compte.is_active && (
+          {moi?.role === 'ADMINISTRATEUR' && !compte.is_active && (
             <Button
               size="compact-sm"
               variant="outline"
@@ -191,20 +199,22 @@ export default function ProfilPage() {
         <Title order={2}>Gestion des comptes utilisateurs</Title>
       </Group>
 
-      <Group mb="md">
-        <Select
-          placeholder="Filtrer par rôle"
-          value={filtreRole}
-          onChange={(val) => setFiltreRole(val ?? '')}
-          data={[
-            { value: 'client', label: 'Client' },
-            { value: 'mecanicien', label: 'Mécanicien' },
-            { value: 'gestionnaire', label: 'Gestionnaire' },
-            { value: 'administrateur', label: 'Administrateur' },
-          ]}
-          clearable
-        />
-      </Group>
+      {estAdmin && (
+        <Group mb="md">
+          <Select
+            placeholder="Filtrer par rôle"
+            value={filtreRole}
+            onChange={(val) => setFiltreRole(val ?? '')}
+            data={[
+              { value: 'CLIENT', label: 'Client' },
+              { value: 'MECANICIEN', label: 'Mécanicien' },
+              { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+              { value: 'ADMINISTRATEUR', label: 'Administrateur' },
+            ]}
+            clearable
+          />
+        </Group>
+      )}
 
       {isLoading ? (
         <Loader color="black" />
@@ -271,10 +281,10 @@ export default function ProfilPage() {
             value={form.role}
             onChange={(valeur) => champ('role', valeur)}
             data={[
-              { value: 'client', label: 'Client' },
-              { value: 'mecanicien', label: 'Mécanicien' },
-              { value: 'gestionnaire', label: 'Gestionnaire' },
-              { value: 'administrateur', label: 'Administrateur' },
+              { value: 'CLIENT', label: 'Client' },
+              { value: 'MECANICIEN', label: 'Mécanicien' },
+              { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+              { value: 'ADMINISTRATEUR', label: 'Administrateur' },
             ]}
             allowDeselect={false}
             mt="sm"

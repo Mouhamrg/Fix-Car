@@ -17,11 +17,12 @@ class InscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
         fields = ['username', 'email', 'first_name', 'last_name',
-                  'role', 'telephone', 'password']
+                   'telephone', 'password']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
         utilisateur = Utilisateur(**validated_data)
+        utilisateur.role = Utilisateur.Role.CLIENT
         utilisateur.set_password(password)
         utilisateur.save()
         return utilisateur
