@@ -140,3 +140,122 @@ class UtilisateurTests(TestCase):
         response = self.client.delete(f'/api/comptes/{cible.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Utilisateur.objects.filter(id=cible.id).exists())
+
+    def test_creer_compte_mecanicien_par_gestionnaire(self):
+        gestionnaire = Utilisateur.objects.create_user(
+            username='gest1', password='MotDePasse123!', role='GESTIONNAIRE'
+        )
+        self.client.force_authenticate(user=gestionnaire)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'mecano1',
+            'email': 'mecano1@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Meca',
+            'last_name': 'Nicien',
+            'telephone': '1234567890',
+            'role': 'MECANICIEN',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['role'], 'MECANICIEN')
+
+    def test_creer_compte_mecanicien_par_admin(self):
+        admin = Utilisateur.objects.create_user(
+            username='admin_creation1', password='MotDePasse123!', role='ADMINISTRATEUR'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'mecano2',
+            'email': 'mecano2@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Meca',
+            'last_name': 'Nicien2',
+            'telephone': '1234567890',
+            'role': 'MECANICIEN',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_creer_compte_mecanicien_par_client_refuse(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'mecano3',
+            'email': 'mecano3@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Meca',
+            'last_name': 'Nicien3',
+            'telephone': '1234567890',
+            'role': 'MECANICIEN',
+        })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_creer_compte_gestionnaire_par_gestionnaire(self):
+        gestionnaire = Utilisateur.objects.create_user(
+            username='gest2', password='MotDePasse123!', role='GESTIONNAIRE'
+        )
+        self.client.force_authenticate(user=gestionnaire)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'gest3',
+            'email': 'gest3@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Gestion',
+            'last_name': 'Naire',
+            'telephone': '1234567890',
+            'role': 'GESTIONNAIRE',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_creer_compte_administrateur_par_gestionnaire_refuse(self):
+        gestionnaire = Utilisateur.objects.create_user(
+            username='gest4', password='MotDePasse123!', role='GESTIONNAIRE'
+        )
+        self.client.force_authenticate(user=gestionnaire)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'admin4',
+            'email': 'admin4@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Admin',
+            'last_name': 'Istrateur',
+            'telephone': '1234567890',
+            'role': 'ADMINISTRATEUR',
+        })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_creer_compte_administrateur_par_admin(self):
+        admin = Utilisateur.objects.create_user(
+            username='admin_createur', password='MotDePasse123!', role='ADMINISTRATEUR'
+        )
+        self.client.force_authenticate(user=admin)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'admin5',
+            'email': 'admin5@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Admin',
+            'last_name': 'Istrateur2',
+            'telephone': '1234567890',
+            'role': 'ADMINISTRATEUR',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_creer_compte_client_redirige_vers_inscription(self):
+        gestionnaire = Utilisateur.objects.create_user(
+            username='gest5', password='MotDePasse123!', role='GESTIONNAIRE'
+        )
+        self.client.force_authenticate(user=gestionnaire)
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'client6',
+            'email': 'client6@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Client',
+            'last_name': 'Test',
+            'telephone': '1234567890',
+            'role': 'CLIENT',
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_creer_compte_non_authentifie_refuse(self):
+        response = self.client.post('/api/comptes/creer/', {
+            'username': 'mecano7',
+            'email': 'mecano7@test.com',
+            'password': 'MotDePasse123!',
+            'role': 'MECANICIEN',
+        })
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

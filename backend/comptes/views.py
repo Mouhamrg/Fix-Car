@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Utilisateur
-from .serializers import UtilisateurSerializer, InscriptionSerializer
+from .serializers import UtilisateurSerializer, InscriptionSerializer, CreationCompteSerializer
 
 class EstProprietaireOuAdmin(permissions.BasePermission):
     """Un utilisateur peut modifier son propre compte.
@@ -24,6 +24,12 @@ class EstAdmin(permissions.BasePermission):
             and request.user.role == Utilisateur.Role.ADMINISTRATEUR
         )
 
+REGLES_CREATION_COMPTE = {
+    Utilisateur.Role.MECANICIEN: [Utilisateur.Role.GESTIONNAIRE, Utilisateur.Role.ADMINISTRATEUR],
+    Utilisateur.Role.GESTIONNAIRE: [Utilisateur.Role.GESTIONNAIRE, Utilisateur.Role.ADMINISTRATEUR],
+    Utilisateur.Role.ADMINISTRATEUR: [Utilisateur.Role.ADMINISTRATEUR],
+}
+
 class UtilisateurViewSet(viewsets.ModelViewSet):
     queryset = Utilisateur.objects.all()
     serializer_class = UtilisateurSerializer
@@ -35,11 +41,15 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), EstProprietaireOuAdmin()]
         if self.action == 'destroy':
             return [permissions.IsAuthenticated(), EstAdmin()]
+        if self.action == 'creer_compte':
+            return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action == 'inscription':
             return InscriptionSerializer
+        if self.action == 'creer_compte':
+            return CreationCompteSerializer
         return UtilisateurSerializer
 
     def _nettoyer_donnees_modifiables(self, request):
@@ -67,6 +77,35 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def inscription(self, request):
         serializer = InscriptionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='creer')
+    def creer_compte(self, request):
+        role_demande = request.data.get('role')
+
+        if role_demande == Utilisateur.Role.CLIENT:
+            return Response(
+                {'detail': "Utilisez /api/comptes/inscription/ pour créer un compte client."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if role_demande not in [r[0] for r in Utilisateur.Role.choices]:
+            return Response(
+                {'detail': 'Rôle invalide.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        roles_autorises = REGLES_CREATION_COMPTE.get(role_demande, [])
+        if request.user.role not in roles_autorises:
+            return Response(
+                {'detail': "Vous n'avez pas la permission de créer un compte avec ce rôle."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = CreationCompteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
