@@ -14,24 +14,16 @@ class PeutAccederDiagnostic(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if getattr(view, "action", None) == "create":
-            profil = getattr(request.user, "profil", None)
-            return bool(profil and Utilisateur.role == Utilisateur.Role.MECANICIEN)
-        return True
-
+        user = request.user
+        if user.role == "MECANICIEN":
+            return True
+        if user.role == "MECANICIEN":
+            return True
     def has_object_permission(self, request, view, obj):
         user = request.user
         if user.is_superuser:
             return True
-
-        if getattr(view, "action", None) in ("valider", "refuser"):
-            return obj.demande.client_id == user.id
-
-        profil = getattr(user, "profil", None)
-        role = Utilisateur.role if profil else None
-
-        if role == Utilisateur.Role.GESTIONNAIRE:
+        if user.role == "MECANICIEN":
             return True
-        if role == Utilisateur.Role.MECANICIEN:
-            return obj.mecanicien_id == user.id
-        return obj.demande.client_id == user.id
+        if user.role == "GESTIONNAIRE":
+            return True

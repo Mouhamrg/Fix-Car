@@ -8,6 +8,8 @@ import { isAuthenticated } from './api/client.js'
 import RendezVousPage from './pages/RendezVousPage.jsx'
 import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
 import PageFormulaireDiagnostic from "./pages/PageFormulaireDiagnostic";
+import PageAffectations from "./pages/PageAffectations.jsx";
+import PageFormulaireAffectation from './pages/PageFormulaireAffectation.jsx'
 import ProfilPage from './pages/ProfilPage.jsx'
 import InscriptionPage from './pages/InscriptionPage.jsx'
 
@@ -88,6 +90,9 @@ function App() {
       <Route path="/vehicules/:id/modifier" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
       <Route path="/diagnostics/nouveau" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
       <Route path="/diagnostics/:id/modifier" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
+      <Route path="/affectations" element={<ProtectedRoute><PageAffectations /></ProtectedRoute> } />
+      <Route path="/affectations/nouvelle" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
+      <Route path="/affectations/:id/modifier" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
     </Routes>
   )
 }

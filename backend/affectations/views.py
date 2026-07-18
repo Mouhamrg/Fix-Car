@@ -35,14 +35,16 @@ class AffectationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        profil = getattr(user, "profil", None)
         qs = Affectation.objects.select_related(
-            "demande", "demande__client", "demande__vehicule", "mecanicien", "affecte_par"
+            "demande",
+            "demande__client",
+            "mecanicien",
+            "affecte_par"
         )
 
-        if user.is_superuser or (profil and profil.role == Utilisateur.Role.GESTIONNAIRE):
+        if user.is_superuser :
             return qs
-        if profil and Utilisateur.role == Utilisateur.Role.MECANICIEN:
+        if user.role == "MECANICIEN":
             return qs.filter(mecanicien=user)
         return qs.none()
 
@@ -94,10 +96,9 @@ class AffectationViewSet(viewsets.ModelViewSet):
         disponibilité (les disponibles en premier), pour aider le
         gestionnaire à choisir à qui affecter une réparation.
         """
+        user = self.request.user
         profils = (
             Utilisateur.objects.filter(role=Utilisateur.Role.MECANICIEN)
             .select_related("user")
-            .order_by("-disponible", "user__username")
         )
         serializer = MecanicienDisponibleSerializer(profils, many=True)
-        return Response(serializer.data)

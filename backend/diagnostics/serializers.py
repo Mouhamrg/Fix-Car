@@ -12,9 +12,7 @@ class DiagnosticSerializer(serializers.ModelSerializer):
     demande_client_nom = serializers.CharField(
         source="demande.client.get_username", read_only=True
     )
-    demande_vehicule_plaque = serializers.CharField(
-        source="demande.vehicule.plaque_immatriculation", read_only=True
-    )
+
     statut_affichage = serializers.CharField(source="get_statut_display", read_only=True)
 
     class Meta:
@@ -24,7 +22,6 @@ class DiagnosticSerializer(serializers.ModelSerializer):
             "demande",
             "demande_titre",
             "demande_client_nom",
-            "demande_vehicule_plaque",
             "mecanicien",
             "mecanicien_nom",
             "notes_techniques",
@@ -41,7 +38,6 @@ class DiagnosticSerializer(serializers.ModelSerializer):
             "id",
             "demande_titre",
             "demande_client_nom",
-            "demande_vehicule_plaque",
             "mecanicien",
             "mecanicien_nom",
             "statut",
@@ -55,7 +51,7 @@ class DiagnosticSerializer(serializers.ModelSerializer):
     def validate_demande(self, value):
         request = self.context.get("request")
 
-        if value.statut != DemandeReparation.Statut.EN_TRAITEMENT:
+        if value.statut != DemandeReparation.Statut.EN_ATTENTE:
             raise serializers.ValidationError(
                 "Cette demande doit être affectée à un mécanicien (statut « en traitement ») "
                 "avant de pouvoir recevoir un diagnostic."

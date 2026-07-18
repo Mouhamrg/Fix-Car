@@ -26,7 +26,7 @@ class DiagnosticViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = DiagnosticSerializer
-    permission_classes = [IsAuthenticated, PeutAccederDiagnostic]
+    permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "head", "options"]
 
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
