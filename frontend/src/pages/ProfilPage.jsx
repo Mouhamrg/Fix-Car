@@ -16,7 +16,7 @@ import {
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
 import { Navigate } from 'react-router-dom'
-import { listComptes, getCompte, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
+import { listComptes, getCompte, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte, creerCompte } from '../api/comptes.js'
 
 const formVide = {
   first_name: '',
@@ -26,6 +26,16 @@ const formVide = {
   role: 'CLIENT',
 }
 
+const formCreationVide = {
+  username: '',
+  first_name: '',
+  last_name: '',
+  email: '',
+  telephone: '',
+  password: '',
+  role: 'MECANICIEN',
+}
+
 export default function ProfilPage() {
   const queryClient = useQueryClient()
   const [modalOuvert, setModalOuvert] = useState(false)
@@ -33,6 +43,9 @@ export default function ProfilPage() {
   const [form, setForm] = useState(formVide)
   const [erreur, setErreur] = useState(null)
   const [filtreRole, setFiltreRole] = useState('')
+  const [modalCreationOuvert, setModalCreationOuvert] = useState(false)
+  const [formCreation, setFormCreation] = useState(formCreationVide)
+  const [erreurCreation, setErreurCreation] = useState(null)
 
   const { data: moi } = useQuery({
     queryKey: ['me'],
@@ -40,6 +53,19 @@ export default function ProfilPage() {
   })
 
   const estAdmin = moi?.role === 'ADMINISTRATEUR'
+  const estGestionnaire = moi?.role === 'GESTIONNAIRE'
+  const peutCreerCompte = estAdmin || estGestionnaire
+
+  const rolesCreablesParMoi = estAdmin
+    ? [
+        { value: 'MECANICIEN', label: 'Mécanicien' },
+        { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+        { value: 'ADMINISTRATEUR', label: 'Administrateur' },
+      ]
+    : [
+        { value: 'MECANICIEN', label: 'Mécanicien' },
+        { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+      ]
 
   const { data: comptes, isLoading } = useQuery({
     queryKey: ['comptes', filtreRole],
@@ -88,6 +114,24 @@ export default function ProfilPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comptes'] }),
   })
 
+  const creation = useMutation({
+    mutationFn: creerCompte,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comptes'] })
+      fermerModalCreation()
+    },
+    onError: (err) => {
+      const details = err.response?.data
+      setErreurCreation(
+        details && typeof details === 'object'
+          ? Object.entries(details)
+              .map(([champ, messages]) => `${champ} : ${[].concat(messages).join(' ')}`)
+              .join(' — ')
+          : "La création a échoué. Réessayez.",
+      )
+    },
+  })
+
   function ouvrirEdition(compte) {
     setEnEdition(compte)
     setForm({
@@ -132,6 +176,26 @@ export default function ProfilPage() {
 
   function champ(nom, valeur) {
     setForm((precedent) => ({ ...precedent, [nom]: valeur }))
+  }
+
+  function ouvrirCreation() {
+    setFormCreation(formCreationVide)
+    setErreurCreation(null)
+    setModalCreationOuvert(true)
+  }
+
+  function fermerModalCreation() {
+    setModalCreationOuvert(false)
+    setErreurCreation(null)
+  }
+
+  function champCreation(nom, valeur) {
+    setFormCreation((precedent) => ({ ...precedent, [nom]: valeur }))
+  }
+
+  function soumettreCreation(event) {
+    event.preventDefault()
+    creation.mutate(formCreation)
   }
 
   const lignes = (comptes ?? []).map((compte) => (
@@ -197,6 +261,9 @@ export default function ProfilPage() {
     <AppLayout>
       <Group justify="space-between" mb="lg">
         <Title order={2}>Gestion des comptes utilisateurs</Title>
+        {peutCreerCompte && (
+          <Button onClick={ouvrirCreation}>+ Créer un compte</Button>
+        )}
       </Group>
 
       {estAdmin && (
@@ -295,6 +362,79 @@ export default function ProfilPage() {
             </Button>
             <Button type="submit" loading={modification.isPending}>
               Enregistrer
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+
+      <Modal
+        opened={modalCreationOuvert}
+        onClose={fermerModalCreation}
+        title="Créer un compte"
+        centered
+      >
+        <form onSubmit={soumettreCreation}>
+          {erreurCreation && (
+            <Alert color="mono.9" variant="outline" mb="md">
+              {erreurCreation}
+            </Alert>
+          )}
+          <TextInput
+            label="Nom d'utilisateur"
+            value={formCreation.username}
+            onChange={(e) => champCreation('username', e.target.value)}
+            required
+          />
+          <TextInput
+            label="Prénom"
+            value={formCreation.first_name}
+            onChange={(e) => champCreation('first_name', e.target.value)}
+            required
+            mt="sm"
+          />
+          <TextInput
+            label="Nom"
+            value={formCreation.last_name}
+            onChange={(e) => champCreation('last_name', e.target.value)}
+            required
+            mt="sm"
+          />
+          <TextInput
+            label="Courriel"
+            type="email"
+            value={formCreation.email}
+            onChange={(e) => champCreation('email', e.target.value)}
+            required
+            mt="sm"
+          />
+          <TextInput
+            label="Téléphone"
+            value={formCreation.telephone}
+            onChange={(e) => champCreation('telephone', e.target.value)}
+            mt="sm"
+          />
+          <TextInput
+            type="password"
+            label="Mot de passe"
+            value={formCreation.password}
+            onChange={(e) => champCreation('password', e.target.value)}
+            required
+            mt="sm"
+          />
+          <Select
+            label="Rôle"
+            value={formCreation.role}
+            onChange={(valeur) => champCreation('role', valeur)}
+            data={rolesCreablesParMoi}
+            allowDeselect={false}
+            mt="sm"
+          />
+          <Group justify="flex-end" mt="lg">
+            <Button variant="outline" onClick={fermerModalCreation}>
+              Annuler
+            </Button>
+            <Button type="submit" loading={creation.isPending}>
+              Créer le compte
             </Button>
           </Group>
         </form>

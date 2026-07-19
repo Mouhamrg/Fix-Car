@@ -8,3 +8,4 @@ export const desactiverCompte = async (id) => (await api.patch(`/api/comptes/${i
 export const supprimerMonCompte = async (id) => (await api.delete(`/api/comptes/${id}/supprimer-mon-compte/`)).data
 export const changerRole = async (id, role) => (await api.patch(`/api/comptes/${id}/changer-role/`, { role })).data
 export const reactiverCompte = async (id) => (await api.patch(`/api/comptes/${id}/reactiver/`)).data
+export const creerCompte = async (data) => (await api.post('/api/comptes/creer/', data)).data
