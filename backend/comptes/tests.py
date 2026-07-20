@@ -259,3 +259,36 @@ class UtilisateurTests(TestCase):
             'role': 'MECANICIEN',
         })
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_connexion_par_username(self):
+        response = self.client.post('/api/token/', {
+            'identifiant': 'testuser',
+            'password': 'MotDePasse123!',
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_connexion_par_email(self):
+        response = self.client.post('/api/token/', {
+            'identifiant': 'test@test.com',
+            'password': 'MotDePasse123!',
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_connexion_par_telephone(self):
+        self.user.telephone = '5145550001'
+        self.user.save()
+        response = self.client.post('/api/token/', {
+            'identifiant': '5145550001',
+            'password': 'MotDePasse123!',
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_connexion_identifiant_invalide(self):
+        response = self.client.post('/api/token/', {
+            'identifiant': 'inexistant@test.com',
+            'password': 'MotDePasse123!',
+        })
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

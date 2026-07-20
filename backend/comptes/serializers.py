@@ -1,5 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Q
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Utilisateur
 
 
@@ -42,3 +44,24 @@ class CreationCompteSerializer(serializers.ModelSerializer):
         utilisateur.set_password(password)
         utilisateur.save()
         return utilisateur
+
+
+class IdentifiantTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Permet de se connecter avec le nom d'utilisateur, le courriel ou le téléphone."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        champ = self.fields.pop(self.username_field)
+        champ.field_name = 'identifiant'
+        champ.source = None
+        self.fields['identifiant'] = champ
+
+    def validate(self, attrs):
+        identifiant = attrs.pop('identifiant')
+        utilisateur = Utilisateur.objects.filter(
+            Q(username__iexact=identifiant)
+            | Q(email__iexact=identifiant)
+            | Q(telephone=identifiant)
+        ).first()
+        attrs[self.username_field] = utilisateur.username if utilisateur else identifiant
+        return super().validate(attrs)

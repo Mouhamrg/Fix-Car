@@ -1,8 +1,9 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Utilisateur
-from .serializers import UtilisateurSerializer, InscriptionSerializer, CreationCompteSerializer
+from .serializers import UtilisateurSerializer, InscriptionSerializer, CreationCompteSerializer, IdentifiantTokenObtainPairSerializer
 
 class EstProprietaireOuAdmin(permissions.BasePermission):
     """Un utilisateur peut modifier son propre compte.
@@ -171,3 +172,6 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
         if role:
             queryset = queryset.filter(role=role)
         return queryset
+
+class IdentifiantTokenObtainPairView(TokenObtainPairView):
+    serializer_class = IdentifiantTokenObtainPairSerializer
