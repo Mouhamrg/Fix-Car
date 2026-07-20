@@ -13,7 +13,7 @@ import { login } from '../api/client.js'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
+  const [identifiant, setIdentifiant] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -23,10 +23,10 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      await login(username, password)
+      await login(identifiant, password)
       navigate('/')
     } catch {
-      setError("Nom d'utilisateur ou mot de passe invalide.")
+      setError("Identifiant ou mot de passe invalide.")
     } finally {
       setLoading(false)
     }
@@ -43,9 +43,9 @@ export default function LoginPage() {
             </Alert>
           )}
           <TextInput
-            label="Nom d'utilisateur"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            label="Courriel ou téléphone"
+            value={identifiant}
+            onChange={(e) => setIdentifiant(e.target.value)}
             required
           />
           <PasswordInput

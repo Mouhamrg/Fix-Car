@@ -39,8 +39,8 @@ api.interceptors.response.use(
   },
 );
 
-export async function login(username, password) {
-  const { data } = await api.post('/api/token/', { username, password });
+export async function login(identifiant, password) {
+  const { data } = await api.post('/api/token/', { identifiant, password });
   localStorage.setItem('access_token', data.access);
   localStorage.setItem('refresh_token', data.refresh);
   return data;
