@@ -12,12 +12,12 @@ import {
 import { createCompte } from '../api/comptes.js'
 
 const formVide = {
-  username: '',
   email: '',
   first_name: '',
   last_name: '',
   telephone: '',
   password: '',
+  password2: '',
 }
 
 export default function InscriptionPage() {
@@ -67,12 +67,7 @@ export default function InscriptionPage() {
             {erreur && (
               <Text c="red" size="sm" mb="md">{erreur}</Text>
             )}
-            <TextInput
-              label="Nom d'utilisateur"
-              value={form.username}
-              onChange={(e) => champ('username', e.target.value)}
-              required
-            />
+
             <TextInput
               label="Prénom"
               value={form.first_name}
@@ -105,6 +100,13 @@ export default function InscriptionPage() {
               label="Mot de passe"
               value={form.password}
               onChange={(e) => champ('password', e.target.value)}
+              required
+              mt="sm"
+            />
+            <PasswordInput
+              label="Confirmer le mot de passe"
+              value={form.password2}
+              onChange={(e) => champ('password2', e.target.value)}
               required
               mt="sm"
             />

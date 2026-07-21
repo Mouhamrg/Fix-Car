@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
+import InscriptionPage from './pages/InscriptionPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import DemandesPage from './pages/DemandesPage.jsx'
 import InterventionsPage from './pages/InterventionsPage.jsx'
@@ -19,6 +20,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/inscription" element={<InscriptionPage />} />
       <Route
         path="/"
         element={
