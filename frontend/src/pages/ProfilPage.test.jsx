@@ -13,11 +13,13 @@ vi.mock('../api/client.js', () => ({
 
 vi.mock('../api/comptes.js', () => ({
   listComptes: vi.fn(),
+  getCompte: vi.fn(),
   updateCompte: vi.fn(),
   desactiverCompte: vi.fn(),
   supprimerMonCompte: vi.fn(),
   changerRole: vi.fn(),
   reactiverCompte: vi.fn(),
+  creerCompte: vi.fn(),
 }))
 
 const moi = {
@@ -27,7 +29,7 @@ const moi = {
   last_name: 'Niang',
   email: 'test@test.com',
   telephone: '1234567890',
-  role: 'administrateur',
+  role: 'ADMINISTRATEUR',
   is_active: true,
 }
 
@@ -38,7 +40,7 @@ const autreCompte = {
   last_name: 'Dupont',
   email: 'marie@test.com',
   telephone: '0987654321',
-  role: 'client',
+  role: 'CLIENT',
   is_active: true,
 }
 

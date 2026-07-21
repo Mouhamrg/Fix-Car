@@ -68,10 +68,10 @@ export default function ProfilPage() {
       ]
 
   const { data: comptes, isLoading } = useQuery({
-    queryKey: ['comptes', filtreRole],
+    queryKey: ['comptes', filtreRole, moi?.id, estAdmin],
+    enabled: Boolean(moi),
     queryFn: async () => {
       if (estAdmin) return listComptes(filtreRole)
-      if (!moi) return []
       const compte = await getCompte(moi.id)
       return [compte]
     },
