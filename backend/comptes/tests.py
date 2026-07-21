@@ -18,15 +18,50 @@ class UtilisateurTests(TestCase):
 
     def test_inscription(self):
         response = self.client.post('/api/comptes/inscription/', {
-            'username': 'nouveau',
             'email': 'nouveau@test.com',
             'password': 'MotDePasse123!',
+            'password2': 'MotDePasse123!',
             'first_name': 'Nouveau',
             'last_name': 'User',
-            'role': 'CLIENT',
             'telephone': '1234567890'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_inscription_mots_de_passe_differents(self):
+        response = self.client.post('/api/comptes/inscription/', {
+            'email': 'diff@test.com',
+            'password': 'MotDePasse123!',
+            'password2': 'AutreMotDePasse456!',
+            'first_name': 'Test',
+            'last_name': 'User',
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_inscription_username_genere_automatiquement(self):
+        response = self.client.post('/api/comptes/inscription/', {
+            'email': 'auto.genere@test.com',
+            'password': 'MotDePasse123!',
+            'password2': 'MotDePasse123!',
+            'first_name': 'Auto',
+            'last_name': 'Genere',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        nouveau = Utilisateur.objects.get(email='auto.genere@test.com')
+        self.assertEqual(nouveau.username, 'auto.genere')
+
+    def test_inscription_role_invalide(self):
+        response = self.client.post('/api/comptes/inscription/', {
+            'email': 'nouveau2@test.com',
+            'password': 'MotDePasse123!',
+            'password2': 'MotDePasse123!',
+            'first_name': 'Nouveau',
+            'last_name': 'User',
+            'role': 'ADMINISTRATEUR',
+            'telephone': '1234567890'
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        nouveau = Utilisateur.objects.get(email='nouveau2@test.com')
+        self.assertEqual(nouveau.role, 'CLIENT')
 
     def test_liste_non_authentifie(self):
         response = self.client.get('/api/comptes/')
@@ -94,30 +129,18 @@ class UtilisateurTests(TestCase):
         response = self.client.get('/api/comptes/?role=client')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_inscription_role_invalide(self):
-        response = self.client.post('/api/comptes/inscription/', {
-            'username': 'nouveau2',
-            'email': 'nouveau2@test.com',
-            'password': 'MotDePasse123!',
-            'first_name': 'Nouveau',
-            'last_name': 'User',
-            'role': 'ADMINISTRATEUR',
-            'telephone': '1234567890'
-        })
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
     def test_inscription_client(self):
         response = self.client.post('/api/comptes/inscription/', {
-            'username': 'nouveau3',
             'email': 'nouveau3@test.com',
             'password': 'MotDePasse123!',
+            'password2': 'MotDePasse123!',
             'first_name': 'Nouveau',
             'last_name': 'User',
             'role': 'CLIENT',
             'telephone': '1234567890'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        nouveau = Utilisateur.objects.get(username='nouveau3')
+        nouveau = Utilisateur.objects.get(email='nouveau3@test.com')
         self.assertEqual(nouveau.role, 'CLIENT')
 
     def test_suppression_native_refusee_pour_non_admin(self):

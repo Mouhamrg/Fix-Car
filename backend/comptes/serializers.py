@@ -13,17 +13,37 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_joined']
 
 
+def generer_username(email):
+    """Dérive un nom d'utilisateur unique à partir de la partie locale du courriel."""
+    base = email.split('@')[0]
+    candidat = base
+    compteur = 1
+    while Utilisateur.objects.filter(username__iexact=candidat).exists():
+        compteur += 1
+        candidat = f'{base}{compteur}'
+    return candidat
+
+
 class InscriptionSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, label='Confirmation du mot de passe')
 
     class Meta:
         model = Utilisateur
-        fields = ['username', 'email', 'first_name', 'last_name',
-                   'telephone', 'password']
+        fields = ['email', 'first_name', 'last_name', 'telephone', 'password', 'password2']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({'password2': 'Les mots de passe ne correspondent pas.'})
+        return attrs
 
     def create(self, validated_data):
+        validated_data.pop('password2')
         password = validated_data.pop('password')
-        utilisateur = Utilisateur(**validated_data)
+        utilisateur = Utilisateur(
+            username=generer_username(validated_data['email']),
+            **validated_data,
+        )
         utilisateur.role = Utilisateur.Role.CLIENT
         utilisateur.set_password(password)
         utilisateur.save()
