@@ -14,6 +14,7 @@ const links = [
   { to: '/interventions', label: 'Interventions' },
   { to: '/types-reparations', label: 'Types de reparation' },
   { to: '/suivi-reparations', label: 'Suivi des réparations' },
+  { to: '/factures', label: 'Factures' },
   { to: '/profil', label: 'Comptes utilisateurs' },
 ]
 

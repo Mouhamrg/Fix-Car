@@ -15,6 +15,7 @@ import InscriptionPage from './pages/InscriptionPage.jsx'
 
 import PageVehicules from "./pages/PageVehicules";
 import PageFormulaireVehicule from "./pages/PageFormulaireVehicule";
+import PageFactures from "./pages/PageFactures";
 
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
@@ -93,6 +94,7 @@ function App() {
       <Route path="/affectations" element={<ProtectedRoute><PageAffectations /></ProtectedRoute> } />
       <Route path="/affectations/nouvelle" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
       <Route path="/affectations/:id/modifier" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
+      <Route path="/factures" element={<ProtectedRoute><PageFactures /></ProtectedRoute> } />
     </Routes>
   )
 }

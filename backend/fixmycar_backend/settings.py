@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     # Tierces parties
     'rest_framework',
     'rest_framework_simplejwt',
-    
+    'django_filters',
+
     # Apps du projet
     'rendezvous',
     'reparations',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'vehicules',
     "diagnostics",
     "affectations",
+    'paiements',
 ]
 
 MIDDLEWARE = [
