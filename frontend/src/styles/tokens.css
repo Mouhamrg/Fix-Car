@@ -1,0 +1,33 @@
+:root {
+  /* Palette monochrome (noir et blanc), alignée sur le thème Mantine (theme.js)
+     pour un rendu uniforme dans toute l'application. */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f8f8f8;
+  --line: #dddddd;
+  --line-strong: #000000;
+
+  /* Trame de fond discrète (points) */
+  --dot: #ececec;
+
+  --ink: #151515;
+  --ink-muted: #666666;
+  --ink-faint: #999999;
+
+  --accent: #000000;
+  --accent-ink: #ffffff;
+  --accent-muted: #2a2a2a;
+
+  --success: #444444;
+  --success-ink: #ffffff;
+  --danger: #151515;
+  --danger-ink: #ffffff;
+
+  --font-display: "Oswald", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}

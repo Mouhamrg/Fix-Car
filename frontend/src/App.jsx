@@ -7,7 +7,15 @@ import InterventionsPage from './pages/InterventionsPage.jsx'
 import TypesReparationsPage from './pages/TypesReparationsPage.jsx'
 import { isAuthenticated } from './api/client.js'
 import RendezVousPage from './pages/RendezVousPage.jsx'
+import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
+import PageFormulaireDiagnostic from "./pages/PageFormulaireDiagnostic";
+import PageAffectations from "./pages/PageAffectations.jsx";
+import PageFormulaireAffectation from './pages/PageFormulaireAffectation.jsx'
 import ProfilPage from './pages/ProfilPage.jsx'
+import InscriptionPage from './pages/InscriptionPage.jsx'
+
+import PageVehicules from "./pages/PageVehicules";
+import PageFormulaireVehicule from "./pages/PageFormulaireVehicule";
 
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
@@ -61,6 +69,15 @@ function App() {
           </ProtectedRoute>
         }
       />
+        <Route
+            path="/suivi-reparations"
+            element={
+                <ProtectedRoute>
+                    <SuiviReparationsPage />
+                </ProtectedRoute>
+            }
+        />
+
       <Route
         path="/profil"
         element={
@@ -69,6 +86,14 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/vehicules" element={<ProtectedRoute><PageVehicules /></ProtectedRoute> } />
+      <Route path="/vehicules/nouveau" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
+      <Route path="/vehicules/:id/modifier" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
+      <Route path="/diagnostics/nouveau" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
+      <Route path="/diagnostics/:id/modifier" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
+      <Route path="/affectations" element={<ProtectedRoute><PageAffectations /></ProtectedRoute> } />
+      <Route path="/affectations/nouvelle" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
+      <Route path="/affectations/:id/modifier" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
     </Routes>
   )
 }

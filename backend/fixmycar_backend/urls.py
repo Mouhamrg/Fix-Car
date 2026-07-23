@@ -8,13 +8,16 @@ from django.urls import include, path
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 from comptes.views import IdentifiantTokenObtainPairView
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def me(request):
-    """Renvoie l'utilisateur connecté — sert à valider la chaîne JWT."""
     user = request.user
+
     return Response({
         'id': user.id,
         'username': user.username,
@@ -34,4 +37,8 @@ urlpatterns = [
     path('api/', include('reparations.urls')),
     path('api/', include('interventions.urls')),
     path('api/', include('comptes.urls')),
+    path('api/', include('vehicules.urls')),
+    path('api/', include('diagnostics.urls')),
+    path('api/', include('affectations.urls')),
+
 ]

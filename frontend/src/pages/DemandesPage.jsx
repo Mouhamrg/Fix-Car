@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import {
   Alert,
   Badge,
@@ -159,6 +160,15 @@ export default function DemandesPage() {
           </Group>
         )}
       </Table.Td>
+      <Table.Td>
+            <Link
+              to={`/diagnostics/nouveau?demande=${demande.id}`}
+              className="bouton bouton--principal"
+            >
+              Ajouter un diagnostic
+            </Link>
+
+      </Table.Td>
     </Table.Tr>
   ))
 
@@ -182,6 +192,7 @@ export default function DemandesPage() {
               <Table.Th>Client</Table.Th>
               <Table.Th>Statut</Table.Th>
               <Table.Th>Actions</Table.Th>
+              <Table.Th>Diagnostic</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>{lignes}</Table.Tbody>

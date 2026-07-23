@@ -1,19 +1,29 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Box, Button, Container, Group, Text } from '@mantine/core'
 import { logout } from '../api/client.js'
+import { useQuery } from '@tanstack/react-query'
+import api from '../api/client.js'
 
 const links = [
   { to: '/', label: 'Accueil' },
+  { to: '/vehicules', label: 'Véhicules' },
   { to: '/rendez-vous', label: 'Rendez-vous' },
   { to: '/demandes', label: 'Demandes de reparation' },
+  { to: '/affectations', label: 'Mes tâches' },
+
   { to: '/interventions', label: 'Interventions' },
   { to: '/types-reparations', label: 'Types de reparation' },
+  { to: '/suivi-reparations', label: 'Suivi des réparations' },
   { to: '/profil', label: 'Comptes utilisateurs' },
 ]
 
 export default function AppLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { data: moi } = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => (await api.get('/api/me/')).data,
+  })
 
   function handleLogout() {
     logout()
@@ -30,7 +40,9 @@ export default function AppLayout({ children }) {
                 FixMyCar
               </Text>
               <Group gap="md">
-                {links.map((link) => (
+                {links
+                .filter(link => link.to !== '/profil' || moi?.role === 'ADMINISTRATEUR')
+                .map((link) => (
                   <Text
                     key={link.to}
                     component={Link}

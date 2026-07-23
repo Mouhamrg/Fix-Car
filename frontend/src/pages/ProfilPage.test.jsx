@@ -22,6 +22,10 @@ vi.mock('../api/comptes.js', () => ({
   creerCompte: vi.fn(),
 }))
 
+vi.mock('../components/AppLayout.jsx', () => ({
+  default: ({ children }) => <div>{children}</div>,
+}))
+
 const moi = {
   id: 1,
   username: 'Aboubacar',

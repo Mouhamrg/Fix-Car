@@ -257,6 +257,10 @@ export default function ProfilPage() {
     </Table.Tr>
   ))
 
+  if (moi && moi.role !== 'ADMINISTRATEUR') {
+    return <Navigate to="/" replace />
+  }
+
   return (
     <AppLayout>
       <Group justify="space-between" mb="lg">

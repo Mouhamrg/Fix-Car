@@ -7,7 +7,8 @@ import '@mantine/core/styles.css'
 import './index.css'
 import App from './App.jsx'
 import { theme } from './theme.js'
-
+import "./styles/global.css";
+import { UserProvider } from "./utils/user";
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(
@@ -15,7 +16,10 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <MantineProvider theme={theme}>
         <BrowserRouter>
-          <App />
+        
+            <UserProvider>
+              <App />
+            </UserProvider>
         </BrowserRouter>
       </MantineProvider>
     </QueryClientProvider>

@@ -1,3 +1,4 @@
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -172,6 +173,5 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
         if role:
             queryset = queryset.filter(role=role)
         return queryset
-
 class IdentifiantTokenObtainPairView(TokenObtainPairView):
     serializer_class = IdentifiantTokenObtainPairSerializer
