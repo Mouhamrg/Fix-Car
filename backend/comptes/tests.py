@@ -23,7 +23,7 @@ class UtilisateurTests(TestCase):
             'password': 'MotDePasse123!',
             'first_name': 'Nouveau',
             'last_name': 'User',
-            'role': 'client',
+            'role': 'CLIENT',
             'telephone': '1234567890'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -53,17 +53,17 @@ class UtilisateurTests(TestCase):
         self.client.force_authenticate(user=admin)
         response = self.client.patch(
             f'/api/comptes/{self.user.id}/changer-role/',
-            {'role': 'mecanicien'}
+            {'role': 'MECANICIEN'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.role, 'mecanicien')
+        self.assertEqual(self.user.role, 'MECANICIEN')
 
     def test_changer_role_non_admin(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(
             f'/api/comptes/{self.user.id}/changer-role/',
-            {'role': 'mecanicien'}
+            {'role': 'MECANICIEN'}
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -85,3 +85,38 @@ class UtilisateurTests(TestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get('/api/comptes/?role=client')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        def test_inscription_role_invalide(self):
+            response = self.client.post('/api/comptes/inscription/', {
+                'username': 'nouveau2',
+                'email': 'nouveau2@test.com',
+                'password': 'MotDePasse123!',
+                'first_name': 'Nouveau',
+                'last_name': 'User',
+                'role': 'ADMINISTRATEUR',
+                'telephone': '1234567890'
+            })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/api/comptes/inscription/', {
+            'username': 'nouveau2',
+            'email': 'nouveau2@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Nouveau',
+            'last_name': 'User',
+            'role': 'ADMINISTRATEUR',
+            'telephone': '1234567890'
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_inscription_client(self):
+        response = self.client.post('/api/comptes/inscription/', {
+            'username': 'nouveau3',
+            'email': 'nouveau3@test.com',
+            'password': 'MotDePasse123!',
+            'first_name': 'Nouveau',
+            'last_name': 'User',
+            'role': 'CLIENT',
+            'telephone': '1234567890'
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['role'], 'CLIENT')

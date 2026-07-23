@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Alert,
   Button,
   Container,
   Paper,
   PasswordInput,
+  Text,
   TextInput,
   Title,
 } from '@mantine/core'
@@ -58,6 +60,12 @@ export default function LoginPage() {
           <Button type="submit" fullWidth mt="xl" loading={loading}>
             Se connecter
           </Button>
+          <Text ta="center" mt="md" size="sm">
+            Pas encore de compte ?{' '}
+            <Text component={Link} to="/inscription" c="black" td="underline">
+              S'inscrire
+            </Text>
+          </Text>
         </form>
       </Paper>
     </Container>

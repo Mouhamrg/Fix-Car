@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     ...
     "comptes",
     "vehicules",
-    "demandes_reparation",
+    "demandes",
     "affectations",
 ]
 ```
@@ -31,7 +31,7 @@ urlpatterns = [
     ...
     path("api/", include("comptes.urls")),
     path("api/", include("vehicules.urls")),
-    path("api/", include("demandes_reparation.urls")),
+    path("api/", include("demandes.urls")),
     path("api/", include("affectations.urls")),
 ]
 ```
@@ -58,21 +58,15 @@ Un client n'a **aucun accès** à ce module (403). Il voit qui répare
 son véhicule indirectement via le champ `mecanicien_assigne` exposé
 par `GET /api/demandes-reparation/{id}/`.
 
-## 4. Règles métier implémentées
+## 4. Exemple d'utilisation
 
-- Seuls les comptes de rôle `MECANICIEN` peuvent être affectés.
-- Une demande ne peut avoir qu'**une affectation à la fois** (relation
-  `OneToOne`) : une nouvelle tentative sur une demande déjà affectée
-  est refusée — il faut modifier (`PATCH`) l'affectation existante
-  pour réaffecter.
-- Impossible d'affecter une demande déjà `TERMINEE` ou `ANNULEE`.
-- **Effet de bord automatique** : affecter une demande `EN_ATTENTE` la
-  fait passer à `EN_TRAITEMENT`.
-- Le champ `disponible` du `Profil` (module `comptes`) permet de
-  distinguer les mécaniciens qui peuvent recevoir de nouvelles
-  réparations ; l'endpoint `mecaniciens-disponibles` les trie en
-  priorité mais n'empêche pas techniquement d'affecter un mécanicien
-  marqué indisponible (le gestionnaire garde la décision finale).
+- Se connecter avec un compte GESTIONNAIRE
+- Aller sur "Mes taches"
+- s'il y a des reparations en attente, le lien Affecter apparaitra sur chque demande de reparation
+- cliquer sur une Affecter pour aller a l'interface Admin pour les affections 
+- se connecter avec `admin` et `admin12345`
+- Puis vous pouvez assigner des taches aux mecaniciens.
+
 
 
 

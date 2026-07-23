@@ -16,13 +16,14 @@ import {
 import AppLayout from '../components/AppLayout.jsx'
 import api from '../api/client.js'
 import { listComptes, updateCompte, desactiverCompte, supprimerMonCompte, changerRole, reactiverCompte } from '../api/comptes.js'
+import { Navigate } from 'react-router-dom'
 
 const formVide = {
   first_name: '',
   last_name: '',
   email: '',
   telephone: '',
-  role: 'client',
+  role: 'CLIENT',
 }
 
 export default function ProfilPage() {
@@ -161,7 +162,7 @@ export default function ProfilPage() {
               Supprimer mon compte
             </Button>
           )}
-          {moi?.role === 'administrateur' && compte.is_active && (
+          {moi?.role === 'ADMINISTRATEUR' && compte.is_active && (
             <Button
               size="compact-sm"
               variant="subtle"
@@ -171,7 +172,7 @@ export default function ProfilPage() {
             </Button>
           )}
 
-          {moi?.role === 'administrateur' && !compte.is_active && (
+          {moi?.role === 'ADMINISTRATEUR' && !compte.is_active && (
             <Button
               size="compact-sm"
               variant="outline"
@@ -185,6 +186,14 @@ export default function ProfilPage() {
     </Table.Tr>
   ))
 
+  if (moi && moi.role !== 'ADMINISTRATEUR') {
+    return <Navigate to="/" replace />
+  }
+
+ if (moi && moi.role !== 'ADMINISTRATEUR') {
+    return <Navigate to="/" replace />
+  }
+
   return (
     <AppLayout>
       <Group justify="space-between" mb="lg">
@@ -197,10 +206,10 @@ export default function ProfilPage() {
           value={filtreRole}
           onChange={(val) => setFiltreRole(val ?? '')}
           data={[
-            { value: 'client', label: 'Client' },
-            { value: 'mecanicien', label: 'Mécanicien' },
-            { value: 'gestionnaire', label: 'Gestionnaire' },
-            { value: 'administrateur', label: 'Administrateur' },
+            { value: 'CLIENT', label: 'Client' },
+            { value: 'MECANICIEN', label: 'Mécanicien' },
+            { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+            { value: 'ADMINISTRATEUR', label: 'Administrateur' },
           ]}
           clearable
         />
@@ -271,10 +280,10 @@ export default function ProfilPage() {
             value={form.role}
             onChange={(valeur) => champ('role', valeur)}
             data={[
-              { value: 'client', label: 'Client' },
-              { value: 'mecanicien', label: 'Mécanicien' },
-              { value: 'gestionnaire', label: 'Gestionnaire' },
-              { value: 'administrateur', label: 'Administrateur' },
+              { value: 'CLIENT', label: 'Client' },
+              { value: 'MECANICIEN', label: 'Mécanicien' },
+              { value: 'GESTIONNAIRE', label: 'Gestionnaire' },
+              { value: 'ADMINISTRATEUR', label: 'Administrateur' },
             ]}
             allowDeselect={false}
             mt="sm"

@@ -5,12 +5,12 @@ function extraireListe(data) {
 }
 
 export async function listerDiagnostics() {
-  const { data } = await client.get("/diagnostics/");
+  const { data } = await client.get("/api/diagnostics/");
   return extraireListe(data);
 }
 
 export async function obtenirDiagnostic(id) {
-  const { data } = await client.get(`/diagnostics/${id}/`);
+  const { data } = await client.get(`/api/diagnostics/${id}/`);
   return data;
 }
 
