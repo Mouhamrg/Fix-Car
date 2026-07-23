@@ -90,6 +90,10 @@ function App() {
       <Route path="/vehicules/:id/modifier" element={<ProtectedRoute><PageFormulaireVehicule /></ProtectedRoute> } />
       <Route path="/diagnostics/nouveau" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
       <Route path="/diagnostics/:id/modifier" element={<ProtectedRoute><PageFormulaireDiagnostic /></ProtectedRoute> } />
+      <Route path="/affectations" element={<ProtectedRoute><PageAffectations /></ProtectedRoute> } />
+      <Route path="/affectations/nouveau" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
+      <Route path="/affectations/:id/modifier" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
+      <Route path="/factures" element={<ProtectedRoute><FacturesPage /></ProtectedRoute> } />
     </Routes>
   )
 }
