@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from diagnostics.models import Diagnostic
 from reparations.models import DemandeReparation
 
 from .models import Facture
@@ -76,6 +77,10 @@ class FactureModelTests(APITestCase):
 
 
 class FactureApiTests(APITestCase):
+    """Tests de lecture des factures. La création manuelle a été retirée
+    (#12, changement de conception validé par le PO) : seule l'action
+    /generer/ (voir FactureGenerationApiTests) crée des factures."""
+
     def setUp(self):
         self.client_user = User.objects.create_user(username='alice', password='x')
         self.gestionnaire = User.objects.create_user(username='gestion1', password='x')
@@ -83,15 +88,6 @@ class FactureApiTests(APITestCase):
             self.client_user, statut=DemandeReparation.Statut.TERMINEE
         )
         self.url_liste = '/api/factures/'
-
-    def payload(self, **surcharges):
-        donnees = {
-            'demande': self.demande.id,
-            'montant_main_oeuvre': '200.00',
-            'montant_pieces': '100.00',
-        }
-        donnees.update(surcharges)
-        return donnees
 
     # --- Authentification ---
 
@@ -103,73 +99,123 @@ class FactureApiTests(APITestCase):
             reponse = methode(url)
             self.assertEqual(reponse.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # --- Création ---
+    # --- Création manuelle retirée ---
 
-    def test_creation_calcule_les_taxes(self):
+    def test_creation_manuelle_non_autorisee(self):
         self.client.force_authenticate(self.gestionnaire)
-        reponse = self.client.post(self.url_liste, self.payload())
-        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(reponse.data['tps'], '15.00')
-        self.assertEqual(reponse.data['tvq'], '29.93')
-        self.assertEqual(reponse.data['montant_total'], '344.93')
-
-    def test_champs_calcules_non_modifiables_via_lapi(self):
-        self.client.force_authenticate(self.gestionnaire)
-        reponse = self.client.post(self.url_liste, self.payload(
-            numero='FAC-9999-9999',
-            tps='0.00',
-            tvq='0.00',
-            montant_total='0.00',
-            statut=Facture.Statut.PAYEE,
-        ))
-        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
-        self.assertNotEqual(reponse.data['numero'], 'FAC-9999-9999')
-        self.assertEqual(reponse.data['tps'], '15.00')
-        self.assertEqual(reponse.data['montant_total'], '344.93')
-        self.assertEqual(reponse.data['statut'], Facture.Statut.EMISE)
-
-    def test_double_facturation_refusee(self):
-        self.client.force_authenticate(self.gestionnaire)
-        self.client.post(self.url_liste, self.payload())
-        reponse = self.client.post(self.url_liste, self.payload())
-        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('demande', reponse.data)
-
-    def test_facturation_demande_annulee_refusee(self):
-        # 'annulee' n'est pas une valeur choisie par DemandeReparation.Statut
-        # aujourd'hui (voir docs/mcd.md RG5) ; on force la valeur en base pour
-        # vérifier que la garde préventive du serializer réagit bien le jour
-        # où ce statut existera.
-        DemandeReparation.objects.filter(id=self.demande.id).update(statut='annulee')
-        self.demande.refresh_from_db()
-
-        self.client.force_authenticate(self.gestionnaire)
-        reponse = self.client.post(self.url_liste, self.payload())
-        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('demande', reponse.data)
+        reponse = self.client.post(self.url_liste, {
+            'demande': self.demande.id,
+            'montant_main_oeuvre': '200.00',
+            'montant_pieces': '100.00',
+        })
+        self.assertEqual(reponse.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     # --- Lecture ---
 
     def test_utilisateur_authentifie_voit_les_factures(self):
+        Facture.objects.create(
+            demande=self.demande,
+            montant_main_oeuvre=Decimal('200.00'),
+            montant_pieces=Decimal('100.00'),
+        )
         self.client.force_authenticate(self.gestionnaire)
-        self.client.post(self.url_liste, self.payload())
         reponse = self.client.get(self.url_liste)
         self.assertEqual(reponse.status_code, status.HTTP_200_OK)
         self.assertEqual(len(reponse.data), 1)
 
 
-    def test_facturation_demande_non_terminee_refusee(self):
-        demande_en_attente = creer_demande(self.client_user, titre='Pas prête')
-        self.client.force_authenticate(self.gestionnaire)
-        reponse = self.client.post(
-            self.url_liste, self.payload(demande=demande_en_attente.id)
-        )
-        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('demande', reponse.data)
+class FactureGenerationApiTests(APITestCase):
+    """Tests de POST /api/factures/generer/ (#12, action client)."""
 
-    def test_facturation_demande_terminee_acceptee(self):
-        self.demande.statut = DemandeReparation.Statut.TERMINEE
-        self.demande.save()
-        self.client.force_authenticate(self.gestionnaire)
-        reponse = self.client.post(self.url_liste, self.payload())
+    def setUp(self):
+        self.client_user = User.objects.create_user(username='alice', password='x')
+        self.autre_client = User.objects.create_user(username='bob', password='x')
+        self.mecanicien = User.objects.create_user(username='mario', password='x')
+        self.demande = creer_demande(
+            self.client_user, statut=DemandeReparation.Statut.TERMINEE
+        )
+        self.url = '/api/factures/generer/'
+
+    def creer_diagnostic(self, cout_estime):
+        return Diagnostic.objects.create(
+            demande=self.demande,
+            mecanicien=self.mecanicien,
+            notes_techniques='Observations.',
+            travaux_a_effectuer='Remplacement des plaquettes.',
+            cout_estime=cout_estime,
+        )
+
+    def test_generation_refusee_sans_authentification(self):
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
+        self.assertEqual(reponse.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_generation_reussie_sans_diagnostic_montant_zero(self):
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
         self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(reponse.data['montant_main_oeuvre'], '0.00')
+        self.assertEqual(reponse.data['montant_pieces'], '0.00')
+        self.assertEqual(reponse.data['tps'], '0.00')
+        self.assertEqual(reponse.data['tvq'], '0.00')
+        self.assertEqual(reponse.data['montant_total'], '0.00')
+
+    def test_generation_reprend_le_cout_du_diagnostic_et_recalcule_les_taxes(self):
+        self.creer_diagnostic(Decimal('200.00'))
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
+        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(reponse.data['montant_main_oeuvre'], '200.00')
+        self.assertEqual(reponse.data['montant_pieces'], '0.00')
+        self.assertEqual(reponse.data['tps'], '10.00')
+        self.assertEqual(reponse.data['tvq'], '19.95')
+        self.assertEqual(reponse.data['montant_total'], '229.95')
+
+    def test_generation_refusee_si_demande_non_terminee(self):
+        demande_en_attente = creer_demande(self.client_user, titre='Pas prete')
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.post(self.url, {'demande': demande_en_attente.id})
+        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_generation_refusee_pour_demande_dun_autre_client(self):
+        self.client.force_authenticate(self.autre_client)
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
+        self.assertEqual(reponse.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_generation_refusee_si_deja_facturee(self):
+        self.client.force_authenticate(self.client_user)
+        self.client.post(self.url, {'demande': self.demande.id})
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
+        self.assertEqual(reponse.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class FacturePdfApiTests(APITestCase):
+    """Tests de GET /api/factures/{id}/pdf/ (#12)."""
+
+    def setUp(self):
+        self.client_user = User.objects.create_user(username='alice', password='x')
+        self.demande = creer_demande(
+            self.client_user, statut=DemandeReparation.Statut.TERMINEE
+        )
+        self.facture = Facture.objects.create(
+            demande=self.demande,
+            montant_main_oeuvre=Decimal('200.00'),
+            montant_pieces=Decimal('100.00'),
+        )
+        self.url = f'/api/factures/{self.facture.id}/pdf/'
+
+    def test_telechargement_refuse_sans_authentification(self):
+        reponse = self.client.get(self.url)
+        self.assertEqual(reponse.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_telechargement_reussi(self):
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.get(self.url)
+        self.assertEqual(reponse.status_code, status.HTTP_200_OK)
+        self.assertEqual(reponse['Content-Type'], 'application/pdf')
+        self.assertIn(self.facture.numero, reponse['Content-Disposition'])
+        self.assertTrue(reponse.content.startswith(b'%PDF'))
+
+    def test_telechargement_facture_inexistante(self):
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.get('/api/factures/9999/pdf/')
+        self.assertEqual(reponse.status_code, status.HTTP_404_NOT_FOUND)

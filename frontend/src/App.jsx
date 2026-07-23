@@ -7,7 +7,6 @@ import TypesReparationsPage from './pages/TypesReparationsPage.jsx'
 import { isAuthenticated } from './api/client.js'
 import RendezVousPage from './pages/RendezVousPage.jsx'
 import SuiviReparationsPage from './pages/SuiviReparationsPage.jsx'
-import FacturesPage from './pages/FacturesPage.jsx'
 import PageFormulaireDiagnostic from "./pages/PageFormulaireDiagnostic";
 import PageAffectations from "./pages/PageAffectations.jsx";
 import PageFormulaireAffectation from './pages/PageFormulaireAffectation.jsx'
@@ -93,7 +92,6 @@ function App() {
       <Route path="/affectations" element={<ProtectedRoute><PageAffectations /></ProtectedRoute> } />
       <Route path="/affectations/nouveau" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
       <Route path="/affectations/:id/modifier" element={<ProtectedRoute><PageFormulaireAffectation /></ProtectedRoute> } />
-      <Route path="/factures" element={<ProtectedRoute><FacturesPage /></ProtectedRoute> } />
     </Routes>
   )
 }
