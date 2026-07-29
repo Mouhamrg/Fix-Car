@@ -63,9 +63,11 @@ export default function PageAffectations() {
 
   if (utilisateur?.role !== "GESTIONNAIRE") {
     return (
+      <AppLayout>
       <div className="carte etat-vide">
         <p>Cette section est réservée aux gestionnaires, mécaniciens et administrateurs.</p>
       </div>
+      </AppLayout>
     );
   }
 
