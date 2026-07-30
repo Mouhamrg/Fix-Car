@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db.models import Sum
 from django.http import HttpResponse
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -11,6 +12,26 @@ from reparations.models import DemandeReparation
 from .models import Facture
 from .pdf import generer_pdf_facture
 from .serializers import FactureSerializer
+
+
+def _calculer_montant_main_oeuvre(diagnostic):
+    """
+    Montant de main-d'œuvre = somme des prix_standard des types de
+    réparation préconisés au diagnostic (#12).
+
+    Fallback sur cout_estime (devis saisi à la main par le mécanicien)
+    si le diagnostic n'a aucun type de réparation lié — catalogue pas
+    encore utilisé pour cette demande — ou s'il n'y a pas de diagnostic
+    du tout, auquel cas le montant est de 0.
+    """
+    if diagnostic is None:
+        return Decimal('0')
+
+    total = diagnostic.types_reparation.aggregate(total=Sum('prix_standard'))['total']
+    if total is not None:
+        return total
+
+    return diagnostic.cout_estime
 
 
 class FactureViewSet(
@@ -67,13 +88,10 @@ class FactureViewSet(
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # TODO: ventilation main-d'œuvre/pièces à revoir quand les
-        # entités Reparation, Intervention liée à la demande et
-        # LignePiece existeront (#7/#10/#15) ; le coût du diagnostic
-        # est une estimation reprise faute de source réelle.
         diagnostic = getattr(demande, 'diagnostic', None)
-        montant_main_oeuvre = diagnostic.cout_estime if diagnostic else Decimal('0')
+        montant_main_oeuvre = _calculer_montant_main_oeuvre(diagnostic)
 
+        # TODO: montant_pieces à 0 tant que LignePiece (#15) n'existe pas.
         facture = Facture.objects.create(
             demande=demande,
             montant_main_oeuvre=montant_main_oeuvre,

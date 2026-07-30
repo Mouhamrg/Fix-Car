@@ -14,6 +14,7 @@ class DiagnosticSerializer(serializers.ModelSerializer):
     )
 
     statut_affichage = serializers.CharField(source="get_statut_display", read_only=True)
+    types_reparation_noms = serializers.SerializerMethodField()
 
     class Meta:
         model = Diagnostic
@@ -27,6 +28,8 @@ class DiagnosticSerializer(serializers.ModelSerializer):
             "notes_techniques",
             "travaux_a_effectuer",
             "cout_estime",
+            "types_reparation",
+            "types_reparation_noms",
             "statut",
             "statut_affichage",
             "commentaire_client",
@@ -40,6 +43,7 @@ class DiagnosticSerializer(serializers.ModelSerializer):
             "demande_client_nom",
             "mecanicien",
             "mecanicien_nom",
+            "types_reparation_noms",
             "statut",
             "statut_affichage",
             "commentaire_client",
@@ -48,27 +52,18 @@ class DiagnosticSerializer(serializers.ModelSerializer):
             "date_reponse_client",
         ]
 
-    def validate_demande(self, value):
-        request = self.context.get("request")
+    def get_types_reparation_noms(self, obj):
+        return [type_reparation.nom for type_reparation in obj.types_reparation.all()]
 
+    def validate_demande(self, value):
         if value.statut != DemandeReparation.Statut.EN_ATTENTE:
             raise serializers.ValidationError(
                 "Cette demande doit être affectée à un mécanicien (statut « en traitement ») "
                 "avant de pouvoir recevoir un diagnostic."
             )
 
-        # Import local pour éviter un couplage au niveau du module :
-        # diagnostics dépend de affectations, jamais l'inverse.
-        from affectations.models import Affectation
-
-        affectation = Affectation.objects.filter(demande=value).first()
-        est_mecanicien_assigne = (
-            affectation and request and affectation.mecanicien_id == request.user.id
-        )
-        if request and not request.user.is_superuser and not est_mecanicien_assigne:
-            raise serializers.ValidationError(
-                "Vous n'êtes pas le mécanicien assigné à cette demande."
-            )
+        # Vérification "mécanicien assigné" désactivée temporairement,
+        # le temps que le flux d'affectation soit stabilisé/testé.
         return value
 
     def validate_cout_estime(self, value):

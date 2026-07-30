@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from diagnostics.models import Diagnostic
-from reparations.models import DemandeReparation
+from reparations.models import DemandeReparation, TypeReparation
 
 from .models import Facture
 
@@ -145,6 +145,13 @@ class FactureGenerationApiTests(APITestCase):
             cout_estime=cout_estime,
         )
 
+    def creer_type_reparation(self, nom, prix_standard):
+        return TypeReparation.objects.create(
+            nom=nom,
+            duree_estimee_heures=Decimal('1.00'),
+            prix_standard=prix_standard,
+        )
+
     def test_generation_refusee_sans_authentification(self):
         reponse = self.client.post(self.url, {'demande': self.demande.id})
         self.assertEqual(reponse.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -159,7 +166,27 @@ class FactureGenerationApiTests(APITestCase):
         self.assertEqual(reponse.data['tvq'], '0.00')
         self.assertEqual(reponse.data['montant_total'], '0.00')
 
-    def test_generation_reprend_le_cout_du_diagnostic_et_recalcule_les_taxes(self):
+    def test_generation_montant_main_oeuvre_somme_des_types_lies(self):
+        """Si le diagnostic préconise des types de réparation, leur
+        prix_standard remplace le cout_estime saisi à la main (#12)."""
+        diagnostic = self.creer_diagnostic(Decimal('999.00'))
+        vidange = self.creer_type_reparation('Vidange', Decimal('80.00'))
+        freins = self.creer_type_reparation('Changement de freins', Decimal('150.00'))
+        diagnostic.types_reparation.set([vidange, freins])
+
+        self.client.force_authenticate(self.client_user)
+        reponse = self.client.post(self.url, {'demande': self.demande.id})
+
+        self.assertEqual(reponse.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(reponse.data['montant_main_oeuvre'], '230.00')
+        self.assertEqual(reponse.data['montant_pieces'], '0.00')
+        self.assertEqual(reponse.data['tps'], '11.50')
+        self.assertEqual(reponse.data['tvq'], '22.94')
+        self.assertEqual(reponse.data['montant_total'], '264.44')
+
+    def test_generation_reprend_le_cout_du_diagnostic_si_aucun_type_lie(self):
+        """Fallback sur cout_estime quand le diagnostic n'a aucun type
+        de réparation préconisé (#12)."""
         self.creer_diagnostic(Decimal('200.00'))
         self.client.force_authenticate(self.client_user)
         reponse = self.client.post(self.url, {'demande': self.demande.id})

@@ -44,6 +44,12 @@ class Diagnostic(models.Model):
     statut = models.CharField(
         max_length=25, choices=Statut.choices, default=Statut.EN_ATTENTE_VALIDATION
     )
+    types_reparation = models.ManyToManyField(
+        "reparations.TypeReparation",
+        blank=True,
+        related_name="diagnostics",
+        verbose_name="Types de réparation",
+    )
     commentaire_client = models.TextField(
         blank=True, help_text="Motif du refus, fourni par le client (facultatif)."
     )

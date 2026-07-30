@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Alert,
   Badge,
@@ -22,6 +22,7 @@ import {
   listDemandes,
   updateDemande,
 } from '../api/demandes.js'
+import { listerDiagnostics } from '../api/diagnosticsApi'
 
 const formVide = {
   titre: '',
@@ -38,10 +39,22 @@ const statuts = {
 
 export default function DemandesPage() {
   const queryClient = useQueryClient()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [modalOuvert, setModalOuvert] = useState(false)
   const [enEdition, setEnEdition] = useState(null) // demande en cours d'édition, sinon null
   const [form, setForm] = useState(formVide)
   const [erreur, setErreur] = useState(null)
+  const [messageSucces, setMessageSucces] = useState(location.state?.message ?? null)
+
+  // Efface le message de l'historique de navigation pour qu'il ne
+  // réapparaisse pas si le client revient sur cette page plus tard.
+  useEffect(() => {
+    if (location.state?.message) {
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const { data: moi } = useQuery({
     queryKey: ['me'],
@@ -52,6 +65,12 @@ export default function DemandesPage() {
     queryKey: ['demandes'],
     queryFn: listDemandes,
   })
+
+  const { data: diagnostics } = useQuery({
+    queryKey: ['diagnostics'],
+    queryFn: listerDiagnostics,
+  })
+  const diagnosticParDemande = new Map((diagnostics ?? []).map((d) => [d.demande, d]))
 
   function surSucces() {
     queryClient.invalidateQueries({ queryKey: ['demandes'] })
@@ -161,13 +180,35 @@ export default function DemandesPage() {
         )}
       </Table.Td>
       <Table.Td>
-            <Link
-              to={`/diagnostics/nouveau?demande=${demande.id}`}
-              className="bouton bouton--principal"
-            >
-              Ajouter un diagnostic
-            </Link>
-
+        {(() => {
+          const diagnostic = diagnosticParDemande.get(demande.id)
+          if (!diagnostic) {
+            return (
+              <Link
+                to={`/diagnostics/nouveau?demande=${demande.id}`}
+                className="bouton bouton--principal"
+              >
+                Ajouter un diagnostic
+              </Link>
+            )
+          }
+          return (
+            <Group gap="xs" wrap="nowrap">
+              <Badge
+                variant={diagnostic.statut === 'ACCEPTE' ? 'filled' : 'outline'}
+                color="mono.9"
+              >
+                {diagnostic.statut_affichage}
+              </Badge>
+              <Link
+                to={`/diagnostics/${diagnostic.id}/modifier`}
+                className="bouton bouton--discret"
+              >
+                Voir le devis
+              </Link>
+            </Group>
+          )
+        })()}
       </Table.Td>
     </Table.Tr>
   ))
@@ -178,6 +219,18 @@ export default function DemandesPage() {
         <Title order={2}>Demandes de réparation</Title>
         <Button onClick={ouvrirCreation}>+ Nouvelle demande</Button>
       </Group>
+
+      {messageSucces && (
+        <Alert
+          color="mono.9"
+          variant="outline"
+          mb="lg"
+          withCloseButton
+          onClose={() => setMessageSucces(null)}
+        >
+          {messageSucces}
+        </Alert>
+      )}
 
       {isLoading ? (
         <Loader color="black" />

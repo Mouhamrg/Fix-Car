@@ -5,14 +5,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { theme } from '../theme.js'
 
 /** Rend un composant avec les mêmes providers que l'application (main.jsx). */
-export function rendreAvecProviders(ui) {
+export function rendreAvecProviders(ui, { initialEntries = ['/'] } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   return render(
     <QueryClientProvider client={queryClient}>
       <MantineProvider theme={theme}>
-        <MemoryRouter>{ui}</MemoryRouter>
+        <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
       </MantineProvider>
     </QueryClientProvider>,
   )
