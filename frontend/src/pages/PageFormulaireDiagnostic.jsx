@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { MultiSelect } from "@mantine/core";
 import {
   creerDiagnostic,
   modifierDiagnostic,
   obtenirDiagnostic,
 } from "../api/diagnosticsApi";
 import { obtenirDemande } from "../api/demandes";
+import { listTypesReparations } from "../api/typesReparations.js";
 import { extraireErreurs } from "../utils/erreurs";
 import { libelleStatutDevis } from "../constants/diagnosticsChoix";
 import Champ from "../components/Champ";
@@ -25,10 +28,16 @@ export default function PageFormulaireDiagnostic() {
     notes_techniques: "",
     travaux_a_effectuer: "",
     cout_estime: "",
+    types_reparation: [],
   });
   const [erreurs, setErreurs] = useState({ champs: {}, generale: "" });
   const [chargement, setChargement] = useState(true);
   const [enregistrement, setEnregistrement] = useState(false);
+
+  const { data: typesReparations } = useQuery({
+    queryKey: ["types-reparations"],
+    queryFn: listTypesReparations,
+  });
 
   useEffect(() => {
     async function initialiser() {
@@ -40,6 +49,7 @@ export default function PageFormulaireDiagnostic() {
             notes_techniques: data.notes_techniques,
             travaux_a_effectuer: data.travaux_a_effectuer,
             cout_estime: data.cout_estime,
+            types_reparation: (data.types_reparation ?? []).map(String),
           });
         } else if (demandeId) {
           const d = await obtenirDemande(demandeId);
@@ -65,15 +75,32 @@ export default function PageFormulaireDiagnostic() {
     setEnregistrement(true);
     setErreurs({ champs: {}, generale: "" });
     try {
-      const donnees = { ...valeurs, cout_estime: Number(valeurs.cout_estime) };
+      const donnees = {
+        ...valeurs,
+        cout_estime: Number(valeurs.cout_estime),
+        types_reparation: valeurs.types_reparation.map(Number),
+      };
       if (modeEdition) {
         await modifierDiagnostic(id, donnees);
       } else {
         await creerDiagnostic({ demande: Number(demandeId), ...donnees });
       }
-      navigate("/vehilcules");
+      navigate("/demandes", {
+        state: {
+          message: modeEdition
+            ? "Devis révisé renvoyé au client."
+            : "Devis envoyé au client.",
+        },
+      });
     } catch (erreur) {
-      setErreurs(extraireErreurs(erreur));
+      const erreursExtraites = extraireErreurs(erreur);
+      // "demande" n'a pas de champ visible dans ce formulaire (dérivé
+      // de l'URL) : sans ceci, une erreur dessus (ex. mécanicien non
+      // assigné) resterait invisible pour l'utilisateur.
+      if (!erreursExtraites.generale && erreursExtraites.champs.demande) {
+        erreursExtraites.generale = erreursExtraites.champs.demande;
+      }
+      setErreurs(erreursExtraites);
     } finally {
       setEnregistrement(false);
     }
@@ -167,6 +194,26 @@ export default function PageFormulaireDiagnostic() {
             disabled={verrouille}
             required
           />
+
+          <MultiSelect
+            label="Types de réparation préconisés"
+            placeholder="Sélectionner un ou plusieurs types"
+            data={(typesReparations ?? []).map((type) => ({
+              value: String(type.id),
+              label: type.nom,
+            }))}
+            value={valeurs.types_reparation}
+            onChange={(valeur) =>
+              setValeurs((precedent) => ({ ...precedent, types_reparation: valeur }))
+            }
+            disabled={verrouille}
+            searchable
+            clearable
+            mt="sm"
+          />
+          {erreurs.champs.types_reparation && (
+            <span className="message-erreur-champ">{erreurs.champs.types_reparation}</span>
+          )}
 
           {modeEdition && diagnostic?.statut && (
             <p className="texte-aide">Statut actuel : {libelleStatutDevis(diagnostic.statut)}</p>
