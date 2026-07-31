@@ -12,8 +12,8 @@ ROLES_STAFF = (
 class EstClientProprietaireOuStaff(permissions.BasePermission):
     """
     - Le staff (mécaniciens, gestionnaires, administrateurs) a un accès complet.
-    - Un client ne peut voir/payer que les factures liées à ses
-      propres demandes de réparation.
+    - Un client ne peut voir/payer que les paiements liés à ses
+      propres factures (elles-mêmes liées à ses demandes de réparation).
 
     Basé sur `role` plutôt que `is_staff` : ce dernier n'est pas
     synchronisé avec le rôle métier tant que #1/#8 ne le font pas.
@@ -23,5 +23,4 @@ class EstClientProprietaireOuStaff(permissions.BasePermission):
         user = request.user
         if user.is_superuser or user.role in ROLES_STAFF:
             return True
-        demande = obj.demande if hasattr(obj, 'demande') else obj.facture.demande
-        return demande.client_id == user.id
+        return obj.facture.demande.client_id == user.id

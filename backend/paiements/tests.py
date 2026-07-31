@@ -2,9 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from facturation.models import Facture
 from reparations.models import DemandeReparation
-
-from .models import Facture, Paiement
 
 User = get_user_model()
 
@@ -25,50 +24,19 @@ class PaiementAPITestCase(APITestCase):
             vehicule="Toyota Corolla",
             description="Changement de plaquettes",
             client=self.client_user,
+            statut=DemandeReparation.Statut.TERMINEE,
         )
         self.facture = Facture.objects.create(
             demande=self.demande,
-            montant=200,
+            montant_main_oeuvre=200,
+            montant_pieces=0,
         )
-
-    def test_client_ne_voit_que_ses_factures(self):
-        self.client.force_authenticate(self.autre_client)
-        response = self.client.get("/api/factures/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        resultats = (
-            response.data["results"]
-            if isinstance(response.data, dict)
-            else response.data
-        )
-        self.assertEqual(len(resultats), 0)
-
-    def test_client_ne_peut_pas_voir_facture_dautrui(self):
-        self.client.force_authenticate(self.autre_client)
-        response = self.client.get(f"/api/factures/{self.facture.id}/")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_gestionnaire_voit_toutes_les_factures(self):
-        self.client.force_authenticate(self.gestionnaire)
-        response = self.client.get(f"/api/factures/{self.facture.id}/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_client_ne_peut_pas_creer_de_facture(self):
-        self.client.force_authenticate(self.client_user)
-        payload = {"demande": self.demande.id, "montant": "150.00"}
-        response = self.client.post("/api/factures/", payload)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_gestionnaire_peut_creer_une_facture(self):
-        self.client.force_authenticate(self.gestionnaire)
-        payload = {"demande": self.demande.id, "montant": "150.00"}
-        response = self.client.post("/api/factures/", payload)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_client_peut_payer_sa_facture(self):
         self.client.force_authenticate(self.client_user)
         payload = {
             "facture": self.facture.id,
-            "montant": "200.00",
+            "montant": str(self.facture.montant_total),
             "methode": "carte",
         }
         response = self.client.post("/api/paiements/", payload)
@@ -86,17 +54,27 @@ class PaiementAPITestCase(APITestCase):
         response = self.client.post("/api/paiements/", payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.facture.refresh_from_db()
-        self.assertEqual(self.facture.statut, Facture.Statut.EN_ATTENTE)
+        self.assertEqual(self.facture.statut, Facture.Statut.EMISE)
 
     def test_client_ne_peut_pas_payer_facture_dautrui(self):
         self.client.force_authenticate(self.autre_client)
         payload = {
             "facture": self.facture.id,
-            "montant": "200.00",
+            "montant": str(self.facture.montant_total),
             "methode": "carte",
         }
         response = self.client.post("/api/paiements/", payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_gestionnaire_peut_payer_une_facture_dun_client(self):
+        self.client.force_authenticate(self.gestionnaire)
+        payload = {
+            "facture": self.facture.id,
+            "montant": str(self.facture.montant_total),
+            "methode": "carte",
+        }
+        response = self.client.post("/api/paiements/", payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_paiement_montant_negatif_refuse(self):
         self.client.force_authenticate(self.client_user)
@@ -114,8 +92,23 @@ class PaiementAPITestCase(APITestCase):
         self.client.force_authenticate(self.client_user)
         payload = {
             "facture": self.facture.id,
-            "montant": "200.00",
+            "montant": str(self.facture.montant_total),
             "methode": "carte",
         }
         response = self.client.post("/api/paiements/", payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_client_ne_voit_que_ses_paiements(self):
+        self.client.force_authenticate(self.client_user)
+        self.client.post(
+            "/api/paiements/",
+            {"facture": self.facture.id, "montant": "50.00", "methode": "carte"},
+        )
+        self.client.force_authenticate(self.autre_client)
+        response = self.client.get("/api/paiements/")
+        resultats = (
+            response.data["results"]
+            if isinstance(response.data, dict)
+            else response.data
+        )
+        self.assertEqual(len(resultats), 0)

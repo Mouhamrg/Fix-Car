@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from .models import Facture, Paiement
-
-
-@admin.register(Facture)
-class FactureAdmin(admin.ModelAdmin):
-    list_display = ('id', 'demande', 'montant', 'statut', 'date_emission')
-    list_filter = ('statut',)
-    search_fields = ('demande__titre',)
+from .models import Paiement
 
 
 @admin.register(Paiement)

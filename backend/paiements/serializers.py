@@ -4,38 +4,6 @@ from .models import Facture, Paiement
 from .permissions import ROLES_STAFF
 
 
-class FactureSerializer(serializers.ModelSerializer):
-    client_nom = serializers.SerializerMethodField()
-    demande_titre = serializers.CharField(source='demande.titre', read_only=True)
-    solde_du = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Facture
-        fields = [
-            'id',
-            'demande',
-            'demande_titre',
-            'client_nom',
-            'montant',
-            'statut',
-            'solde_du',
-            'date_emission',
-            'date_modification',
-        ]
-        read_only_fields = ['statut', 'date_emission', 'date_modification']
-
-    def get_client_nom(self, obj):
-        client = obj.demande.client
-        return client.get_full_name() or client.username
-
-    def get_solde_du(self, obj):
-        paye = sum(
-            (p.montant for p in obj.paiements.filter(statut=Paiement.Statut.REUSSI)),
-            start=0,
-        )
-        return obj.montant - paye
-
-
 class PaiementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paiement

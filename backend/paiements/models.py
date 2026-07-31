@@ -1,44 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from reparations.models import DemandeReparation
-
-
-class Facture(models.Model):
-    """Facture minimale émise pour une demande de réparation (#13).
-
-    Modèle provisoire tant que la génération de factures (#12) n'est
-    pas implémentée par ailleurs; à faire évoluer (numérotation,
-    détail des lignes, taxes...) lors de l'intégration de #12.
-    """
-
-    class Statut(models.TextChoices):
-        EN_ATTENTE = 'en_attente', 'En attente de paiement'
-        PAYEE = 'payee', 'Payée'
-        ANNULEE = 'annulee', 'Annulée'
-
-    demande = models.ForeignKey(
-        DemandeReparation,
-        on_delete=models.CASCADE,
-        related_name='factures',
-        verbose_name='Demande de réparation',
-    )
-    montant = models.DecimalField(max_digits=8, decimal_places=2)
-    statut = models.CharField(
-        max_length=20,
-        choices=Statut.choices,
-        default=Statut.EN_ATTENTE,
-    )
-    date_emission = models.DateTimeField(auto_now_add=True)
-    date_modification = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'Facture'
-        verbose_name_plural = 'Factures'
-        ordering = ['-date_emission']
-
-    def __str__(self):
-        return f'Facture #{self.pk} — {self.demande.titre} ({self.montant} $)'
+from facturation.models import Facture
 
 
 class Paiement(models.Model):
