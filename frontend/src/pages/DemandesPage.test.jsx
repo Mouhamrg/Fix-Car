@@ -9,6 +9,7 @@ import {
   listDemandes,
   updateDemande,
 } from '../api/demandes.js'
+import { listerDiagnostics } from '../api/diagnosticsApi'
 
 vi.mock('../api/client.js', () => ({
   default: { get: vi.fn() },
@@ -21,6 +22,10 @@ vi.mock('../api/demandes.js', () => ({
   createDemande: vi.fn(),
   updateDemande: vi.fn(),
   deleteDemande: vi.fn(),
+}))
+
+vi.mock('../api/diagnosticsApi', () => ({
+  listerDiagnostics: vi.fn(),
 }))
 
 const moi = { id: 1, username: 'testuser' }
@@ -49,6 +54,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   api.get.mockResolvedValue({ data: moi })
   listDemandes.mockResolvedValue([maDemande, demandeDeJulie])
+  listerDiagnostics.mockResolvedValue([])
 })
 
 function ligneDe(titre) {
@@ -220,5 +226,37 @@ describe('DemandesPage', () => {
     expect(
       await screen.findByText('titre : Ce champ est obligatoire.'),
     ).toBeInTheDocument()
+  })
+
+  it("affiche le statut du devis quand un diagnostic existe déjà pour la demande", async () => {
+    listerDiagnostics.mockResolvedValue([
+      {
+        id: 42,
+        demande: 10,
+        statut: 'EN_ATTENTE_VALIDATION',
+        statut_affichage: 'En attente de validation du client',
+      },
+    ])
+    rendreAvecProviders(<DemandesPage />)
+    await screen.findByText('Bruit moteur')
+
+    const maLigne = within(ligneDe('Bruit moteur'))
+    expect(
+      await maLigne.findByText('En attente de validation du client'),
+    ).toBeInTheDocument()
+    expect(maLigne.queryByText('Ajouter un diagnostic')).toBeNull()
+
+    const ligneJulie = within(ligneDe('Chassis endommage'))
+    expect(ligneJulie.getByText('Ajouter un diagnostic')).toBeInTheDocument()
+  })
+
+  it("affiche le message de succès reçu après l'envoi d'un devis", async () => {
+    rendreAvecProviders(<DemandesPage />, {
+      initialEntries: [
+        { pathname: '/demandes', state: { message: 'Devis envoyé au client.' } },
+      ],
+    })
+
+    expect(await screen.findByText('Devis envoyé au client.')).toBeInTheDocument()
   })
 })
