@@ -27,9 +27,9 @@ https://docs.docker.com/engine/install/ubuntu/
 
 Pourquoi le dépôt Apt officiel plutôt que docker.io (paquet Ubuntu) ou Snap :
 
-	* les versions sont plus récentes ;
-	* le plugin Docker Compose est inclus ;
-	* la désinstallation préalable des anciens paquets évite les conflits entre versions.
+* les versions sont plus récentes ;
+* le plugin Docker Compose est inclus ;
+* la désinstallation préalable des anciens paquets évite les conflits entre versions.
 
 ## 5. Configuration après installation
 
@@ -56,7 +56,10 @@ Il ne le serait pas sur un serveur partagé ou de production.
 
 ## 6. Vérification
 
+```bash
 docker version
+```
+
 Résultat attendu : une section Client et une section Server.
 
 ```bash
