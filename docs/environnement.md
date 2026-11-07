@@ -21,33 +21,53 @@ L'accès à la VM est sécurisé et se fait exclusivement par clé publique/priv
 avec `PasswordAuthentication no`.
 
 ## 4. Installation de Docker 
-**Lien d'installation :** Lien vers la page officiel d'isntallation de Docker engine sur ubuntu : 
+
+Installation de Docker Engine selon la page officielle, méthode du dépôt Apt : 
 https://docs.docker.com/engine/install/ubuntu/
 
-**Choix architectural :** J'ai privilégié l'installation de Docker Engine via son dépôt Apt officiel plutôt que 
-les paquets `docker.io` (distribué par Ubuntu) ou les paquets Snap, car ces derniers souffrent souvent de 
-retards majeurs de mise à jour, d'un manque d'intégration native avec 
-les plugins récents (comme le nouveau CLI Docker Compose), et de restrictions d'isolation propres à Snap 
-qui bloquent fréquemment l'accès réseau ou le montage de volumes nécessaires au bon fonctionnement 
-de nos conteneurs de développement.
+Pourquoi le dépôt Apt officiel plutôt que docker.io (paquet Ubuntu) ou Snap :
 
-**Note technique :** J'ai choisi d'installer Docker Engine via son dépôt Apt officiel plutôt que 
-d'utiliser le paquet par défaut `docker.io` d'Ubuntu afin d'éviter les conflits de binaires 
-avec d'anciennes versions, tout en garantissant une installation stable, sécurisée et 
-native des derniers plugins comme Docker Compose.
+	* les versions sont plus récentes ;
+	* le plugin Docker Compose est inclus ;
+	* la désinstallation préalable des anciens paquets évite les conflits entre versions.
 
-**Configuration des privilèges (Post-installation)**
+## 5. Configuration après installation
 
-Par défaut, le démon Docker s'exécute en tant que root, ce qui exige l'utilisation de `sudo`. Pour exécuter les commandes Docker en tant qu'utilisateur non-privilégié, l'utilisateur a été ajouté au groupe système `docker` :
-1. Création du groupe (généralement déjà créé par l'installateur) :
-   ```bash
-   sudo groupadd docker
-   ```
-2. Ajout de l'utilisateur actuel au groupe :
-   ```bash
-   sudo usermod -aG docker \$USER
-   ```
-3. Prise en compte immédiate des modifications du groupe sans déconnexion :
-   ```bash
-   newgrp docker
-   ```
+Démarrage automatique de Docker au démarrage de la VM :
+
+```bash
+sudo systemctl enable docker.service containerd.service
+```
+
+Utilisation de Docker sans sudo, en ajoutant l'utilisateur au groupe docker :
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+Le groupe docker est normalement créé par l'installation. S'il manque : sudo groupadd docker.
+
+Compromis de sécurité : ajouter un utilisateur au groupe docker lui donne des droits 
+équivalents à root sur la VM, car le démon Docker tourne en root. 
+Ce compromis est accepté ici : VM de développement à un seul utilisateur, 
+accessible uniquement par clés SSH. 
+Il ne le serait pas sur un serveur partagé ou de production.
+
+## 6. Vérification
+
+docker version
+Résultat attendu : une section Client et une section Server.
+
+```bash
+docker run hello-world
+```
+
+Résultat attendu : le message « Hello from Docker! ».
+
+Test après redémarrage : sudo reboot, reconnexion en SSH, puis
+ 
+```bash
+docker run hello-world
+```
+sans relancer Docker à la main. Le même message doit s'afficher.
