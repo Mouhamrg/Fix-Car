@@ -1,58 +1,76 @@
-### Étape 1 : Désinstallation des paquets conflictuels
-Avant l'installation, suppression de toutes les versions incompatibles installées par défaut :
+# Documentation de l'environnement de développement
+
+Ce document décrit la configuration de la machine virtuelle (VM) utilisée pour le projet.
+
+## 1. Ressources de la VM
+*   **Système d'exploitation :** Ubuntu 24.04 LTS
+*   **Processeurs (vCPU) :** 2
+*   **Mémoire vive (RAM) :** 4 Go
+*   **Stockage :** 25 Go SSD
+
+## 2. Configuration Réseau
+*   **Mode réseau :** Réseau en pont (Bridged Adapter)
+*   **Objectif :** Permet à la VM d'obtenir une adresse IP directement depuis le routeur du réseau physique, 
+la rendant accessible comme une machine indépendante sur le réseau local.
+
+## 3. Accès SSH par clés
+L'accès à la VM est sécurisé et se fait exclusivement par clé publique/privée.
+*   **Génération de la clé (sur l'hôte) :** `ssh-keygen -t ed25519`
+*   **Copie de la clé sur la VM :** `ssh-copy-id utilisateur@ip_de_la_vm`
+*   **Désactivation de l'authentification par mot de passe :** Configuré dans `/etc/ssh/sshd_config` 
+avec `PasswordAuthentication no`.
+
+## 4. Installation de Docker 
+
+Installation de Docker Engine selon la page officielle, méthode du dépôt Apt : 
+https://docs.docker.com/engine/install/ubuntu/
+
+Pourquoi le dépôt Apt officiel plutôt que docker.io (paquet Ubuntu) ou Snap :
+
+* les versions sont plus récentes ;
+* le plugin Docker Compose est inclus ;
+* la désinstallation préalable des anciens paquets évite les conflits entre versions.
+
+## 5. Configuration après installation
+
+Démarrage automatique de Docker au démarrage de la VM :
+
 ```bash
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove \$pkg; done
+sudo systemctl enable docker.service containerd.service
 ```
 
-### Étape 2 : Configuration du dépôt Apt officiel
-1. Mise à jour des paquets et installation des dépendances réseau :
-   ```bash
-   sudo apt-get update
-   sudo apt-get install ca-certificates curl
-   ```
-2. Création du répertoire des clés et configuration des sources :
-   ```bash
-   sudo install -m 0755 -d /etc/apt/keyrings
-   sudo curl -fsSL https://docker.com -o /etc/apt/keyrings/docker.asc
-   sudo chmod a+r /etc/apt/keyrings/docker.asc
-   ```
-3. Ajout du dépôt Docker officiel dans les sources Apt de la machine virtuelle :
-   ```bash
-   echo \
-     "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://docker.com \
-     \$(. /etc/os-release && echo "\({UBUNTU_CODENAME:-\)VERSION_CODENAME}") stable" | \
-     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-   ```
+Utilisation de Docker sans sudo, en ajoutant l'utilisateur au groupe docker :
 
-### Étape 3 : Installation de Docker Engine
-Mise à jour de l'index Apt mis à jour avec le nouveau dépôt, puis installation des composants officiels :
 ```bash
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-### Étape 4 : Gestion du service avec Systemd
-Le démarrage automatique et la gestion de l'état du service s'exécutent avec `systemctl` :
-*   **Activer le démarrage automatique au boot :**
-    ```bash
-    sudo systemctl enable docker.service containerd.service
-    ```
-*   **Vérifier le statut actuel du service :**
-    ```bash
-    sudo systemctl status docker
-    ```
+Le groupe docker est normalement créé par l'installation. S'il manque : sudo groupadd docker.
 
-### Étape 5 : Configuration des privilèges (Post-installation)
-Par défaut, le démon Docker s'exécute en tant que root, ce qui exige l'utilisation de `sudo`. Pour exécuter les commandes Docker en tant qu'utilisateur non-privilégié, l'utilisateur a été ajouté au groupe système `docker` :
-1. Création du groupe (généralement déjà créé par l'installateur) :
-   ```bash
-   sudo groupadd docker
-   ```
-2. Ajout de l'utilisateur actuel au groupe :
-   ```bash
-   sudo usermod -aG docker \$USER
-   ```
-3. Prise en compte immédiate des modifications du groupe sans déconnexion :
-   ```bash
-   newgrp docker
-   ```
+Compromis de sécurité : ajouter un utilisateur au groupe docker lui donne des droits 
+équivalents à root sur la VM, car le démon Docker tourne en root. 
+Ce compromis est accepté ici : VM de développement à un seul utilisateur, 
+accessible uniquement par clés SSH. 
+Il ne le serait pas sur un serveur partagé ou de production.
+
+## 6. Vérification
+
+```bash
+docker version
+```
+
+Résultat attendu : une section Client et une section Server.
+
+```bash
+docker run hello-world
+```
+
+Résultat attendu : le message « Hello from Docker! ».
+
+Test après redémarrage : sudo reboot, reconnexion en SSH, puis
+ 
+```bash
+docker run hello-world
+```
+sans relancer Docker à la main. Le même message doit s'afficher.
