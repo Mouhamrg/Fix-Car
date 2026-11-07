@@ -1,48 +1,43 @@
-### Étape 1 : Désinstallation des paquets conflictuels
-Avant l'installation, suppression de toutes les versions incompatibles installées par défaut :
-```bash
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove \$pkg; done
-```
+# Documentation de l'environnement de développement
 
-### Étape 2 : Configuration du dépôt Apt officiel
-1. Mise à jour des paquets et installation des dépendances réseau :
-   ```bash
-   sudo apt-get update
-   sudo apt-get install ca-certificates curl
-   ```
-2. Création du répertoire des clés et configuration des sources :
-   ```bash
-   sudo install -m 0755 -d /etc/apt/keyrings
-   sudo curl -fsSL https://docker.com -o /etc/apt/keyrings/docker.asc
-   sudo chmod a+r /etc/apt/keyrings/docker.asc
-   ```
-3. Ajout du dépôt Docker officiel dans les sources Apt de la machine virtuelle :
-   ```bash
-   echo \
-     "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://docker.com \
-     \$(. /etc/os-release && echo "\({UBUNTU_CODENAME:-\)VERSION_CODENAME}") stable" | \
-     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-   ```
+Ce document décrit la configuration de la machine virtuelle (VM) utilisée pour le projet.
 
-### Étape 3 : Installation de Docker Engine
-Mise à jour de l'index Apt mis à jour avec le nouveau dépôt, puis installation des composants officiels :
-```bash
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
+## 1. Ressources de la VM
+*   **Système d'exploitation :** Ubuntu 24.04 LTS
+*   **Processeurs (vCPU) :** 2
+*   **Mémoire vive (RAM) :** 4 Go
+*   **Stockage :** 25 Go SSD
 
-### Étape 4 : Gestion du service avec Systemd
-Le démarrage automatique et la gestion de l'état du service s'exécutent avec `systemctl` :
-*   **Activer le démarrage automatique au boot :**
-    ```bash
-    sudo systemctl enable docker.service containerd.service
-    ```
-*   **Vérifier le statut actuel du service :**
-    ```bash
-    sudo systemctl status docker
-    ```
+## 2. Configuration Réseau
+*   **Mode réseau :** Réseau en pont (Bridged Adapter)
+*   **Objectif :** Permet à la VM d'obtenir une adresse IP directement depuis le routeur du réseau physique, 
+la rendant accessible comme une machine indépendante sur le réseau local.
 
-### Étape 5 : Configuration des privilèges (Post-installation)
+## 3. Accès SSH par clés
+L'accès à la VM est sécurisé et se fait exclusivement par clé publique/privée.
+*   **Génération de la clé (sur l'hôte) :** `ssh-keygen -t ed25519`
+*   **Copie de la clé sur la VM :** `ssh-copy-id utilisateur@ip_de_la_vm`
+*   **Désactivation de l'authentification par mot de passe :** Configuré dans `/etc/ssh/sshd_config` 
+avec `PasswordAuthentication no`.
+
+## 4. Installation de Docker 
+**Lien d'installation :** Lien vers la page officiel d'isntallation de Docker engine sur ubuntu : 
+https://docs.docker.com/engine/install/ubuntu/
+
+**Choix architectural :** J'ai privilégié l'installation de Docker Engine via son dépôt Apt officiel plutôt que 
+les paquets `docker.io` (distribué par Ubuntu) ou les paquets Snap, car ces derniers souffrent souvent de 
+retards majeurs de mise à jour, d'un manque d'intégration native avec 
+les plugins récents (comme le nouveau CLI Docker Compose), et de restrictions d'isolation propres à Snap 
+qui bloquent fréquemment l'accès réseau ou le montage de volumes nécessaires au bon fonctionnement 
+de nos conteneurs de développement.
+
+**Note technique :** J'ai choisi d'installer Docker Engine via son dépôt Apt officiel plutôt que 
+d'utiliser le paquet par défaut `docker.io` d'Ubuntu afin d'éviter les conflits de binaires 
+avec d'anciennes versions, tout en garantissant une installation stable, sécurisée et 
+native des derniers plugins comme Docker Compose.
+
+**Configuration des privilèges (Post-installation)**
+
 Par défaut, le démon Docker s'exécute en tant que root, ce qui exige l'utilisation de `sudo`. Pour exécuter les commandes Docker en tant qu'utilisateur non-privilégié, l'utilisateur a été ajouté au groupe système `docker` :
 1. Création du groupe (généralement déjà créé par l'installateur) :
    ```bash
