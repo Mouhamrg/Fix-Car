@@ -1,6 +1,6 @@
 ## Contribuer 
 
-Pour maintenir la qualité du projet, merci de respecter les régles suivantes,
+Pour maintenir la qualité du projet, merci de respecter les règles suivantes,
 lors de vos contributions
 
 ### 1. Format des messages de commit 
@@ -12,7 +12,7 @@ doit suivre la structure suivante : `<type>: <description>`
 *	`docs:` Modifications ou ajouts dans la documentation. 
 *	`chore:` Tâches répétitives, maintenance ou configuration (sans modification de code).
 *	`test:` Ajout ou correction de test sans modifier le code de l'application. 
-*	`ci:` Modification du pipeline d'intégration continue (fichier de Workflow GitHub actions dans .github/Workflows/).
+*	`ci:` Modification du pipeline d'intégration continue (fichier de Workflow GitHub actions dans .github/workflows/).
 *	`build:` Modification de la construction ou de l'empaquetage de l'application (Dockerfile, Dépendances).
 
 
@@ -21,9 +21,9 @@ doit suivre la structure suivante : `<type>: <description>`
 ### 2. Nommage des branches 
 Les branches doivent être nommées en minuscules, utiliser des tirets
 comme séparateurs et inclure le numéro d'issue et le type de tâche :
-*	Fonctionnalité : `feat/<numéro>-nom-de-la-feature` ou `docs/4-corrections-revues`
-*	Correction : `fix/numéro-nom-du-bug`
-*	Documentation: docs/4-correction-revue
+*	Fonctionnalité : `feat/<numéro>-nom-de-la-feature`
+*	Correction : `fix/<numéro>-nom-du-bug`
+*	Documentation: `docs/<numéro>-description` par exemple `docs/4-correction-revue`
 
 ### 3. Flux par Pull Request (PR) 
 1. Créez votre branche à partir de `main` à jour (`git pull`d'abord).
